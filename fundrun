@@ -1,0 +1,4 @@
+#set args -h 2 -m 8 -s 0 0 10
+#set args -h 3 -m 8 -s 5 5
+fundamental -h 5 -m 10 -s 30
+set args -h 3 -m 10 -s 8 -e 0.05
