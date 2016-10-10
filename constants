@@ -1,0 +1,20 @@
+m pi 3.14159265
+m e  2.718281828
+p speed_of_light 2.99792458e+8
+p magnetic_constant 1.25663706144e-6
+p electric_constant 8.854187817e-12
+p charge_of_electron 1.60217733e+19
+p mass_of_electron 9.1093897e-31
+p mass_of_proton 1.6726231e-27
+p mass_of_neutron 1.674929e-27
+p electronic_radius 2.81794092e-15
+p planck_constant 6.626076e-34
+p avodagro_constant 6.0221367e+23
+p loschmidt_constant 2.686736e+25
+p molar_gas_constant 8.314510
+p faraday_constant 9.6484531e+4
+p stefan_boltzmann_constant 5.67051e+8
+p rydberg_constant 1.0973731534e+7
+p gravitational_constant 6.67259e+11
+p acceleration_due_to_gravity 9.80665
+
