@@ -65,7 +65,7 @@ The output of the testrun is:
 (5 + (-3 * -n[0]))
 So the sequence formula is 5+(3 x n) n being an integer.
 Accolades & Delusions of Grandeur ;)
-Pio O'Connell and Fundamental
+Pio a friend and Fundamental
 
 Pio is a bright guy, speaks 5 languages, Degree in numerical computation & mathematics currently doing a hdip in cloud computing. I've been 6 years trying to convince Pio that Fundamental was more than curve fitting. After reading Carsten Otte's compliment he decided he'd better investigate himself. Now he's spouting things like GO FOR IT!!, Smart Cookie D.J., uv cracked it this time D.J. Google can't help but buy it. Now he is in disbelief that nothing like it has ever been done before. Stuart Russell & Peter Norvig in Artificial Intelligence a modern approach hint that it can be done but is totally impractical, my program proves otherwise. Pio has agreed to write a fisher price web interface for fundamental & explore data mining possibilities which he is learning in the cloud computing course.... Thanks Pio.
 
