@@ -66,7 +66,7 @@ The output of the testrun is:
 (5 + (3 * n[0]))  
 5 -3 -n[0] * +  
 (5 + (-3 * -n[0]))  
-So the sequence formula is 5+(3 x n) n being an integer.  
+So the sequence formula is y=f(n[0])=5+(3 x n[0]), n[0] being an integer. 
 
 ## Accolades & Delusions of Grandeur ;)
 
