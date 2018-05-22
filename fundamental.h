@@ -3,8 +3,7 @@ This file is part of fundamental a brute force searcher
 for relationships between constants & formulae for sequences.
 Copyright (C) 2004  D.J. Barrow dj_barrow@ariasoft.ie barrow_dj@yahoo.com
 
-It is under MYPL which is entirely compatible with GPL.
-Pay me what it is worth.
+It is licensed under GPL v2.1
 */
 
 #include "fundamental_config.h"
@@ -514,6 +513,8 @@ void init_simplifyable(void);
 
 #define is_operator(tag) ((tag)>last_number_tag) 
 #define is_number(tag) ((tag)<=last_number_tag)
+typedef long stackval_t;
+#define STACKVAL_FORMAT "%ld"
 
 typedef struct
 {
@@ -521,9 +522,10 @@ typedef struct
 #ifdef SIGNED_OPERATION
        int minus;
 #endif
-      long val;
+      stackval_t val;
 } stack_entry;
 
+depth_t get_op_depth(stack_entry *curr);
 
 #define abort_sum(err,format...) \
 { \
