@@ -3,8 +3,7 @@ This file is part of fundamental a brute force searcher
 for relationships between constants & formulae for sequences.
 Copyright (C) 2004  D.J. Barrow dj_barrow@ariasoft.ie barrow_dj@yahoo.com
 
-It is under MYPL which is entirely compatible with GPL.
-Pay me what it is worth.
+It is licensed under GPL v2.1.
 */
 #include <stdarg.h>
 #include "utils.h"

@@ -3,11 +3,11 @@ This file is part of fundamental a brute force searcher
 for relationships between constants & formulae for sequences.
 Copyright (C) 2004  D.J. Barrow dj_barrow@ariasoft.ie barrow_dj@yahoo.com
 
-It is under MYPL which is entirely compatible with GPL.
-Pay me what it is worth.
+It is licensed under GPL v2.1.
 */
 #include "fundamental.h"
 #include <stdio.h>
+#include "utils.h"
 #include <string.h>
 #include <alloca.h>
 #include <stdlib.h>
@@ -227,7 +227,7 @@ void recurse_sum_infix(depth_t rec_depth,sum_t *sum)
 	 break; 
 #endif
       case integer_tag:
-	 printf("%d",curr->val);
+	 printf(STACKVAL_FORMAT,curr->val);
 	 break;
       case arithmetic_operation_tag:
 	 op=curr->val;
@@ -422,7 +422,7 @@ void print_sum_rpn(sum_t *sum)
 	 break; 
 #endif
 	    case integer_tag:
-	       printf("%d ",curr->val);
+	       printf(STACKVAL_FORMAT,curr->val);
 	       break;
 	    case arithmetic_operation_tag:
 	       printf(" %s ",operator_str[curr->val]);

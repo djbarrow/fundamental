@@ -1,3 +1,13 @@
+/*
+This file is part of fundamental a brute force searcher
+for relationships between constants & formulae for sequences.
+It is a source file for the reverse polish notation RPN calculation 
+code in the project.
+Copyright (C) 2018  D.J. Barrow dj_barrow@ariasoft.ie barrow_dj@yahoo.com
+
+It licensed is under GPL v2.1
+*/
+
 #include "fundamental.h"
 #include "utils.h"
 #include "do_sum.h"
