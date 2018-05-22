@@ -2,6 +2,7 @@
 CC=gcc
 OBJFILES = \
 fundamental.o \
+do_sum.o \
 utils.o \
 print_sum.o \
 fundtest.o \
@@ -16,7 +17,7 @@ LIBS = -lm
 
 
 
-%.o: %.c fundamental.h fundamental_config.h fundamental_sanity.h Makefile
+%.o: %.c fundamental.h fundamental_config.h fundamental_sanity.h do_sum.h Makefile
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 fundamental: $(OBJFILES)
