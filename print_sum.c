@@ -1,9 +1,9 @@
 /*
-This file is part of fundamental a brute force searcher
-for relationships between constants & formulae for sequences.
-Copyright (C) 2004  D.J. Barrow dj_barrow@ariasoft.ie barrow_dj@yahoo.com
+  This file is part of fundamental a brute force searcher
+  for relationships between constants & formulae for sequences.
+  Copyright (C) 2004  D.J. Barrow dj_barrow@ariasoft.ie barrow_dj@yahoo.com
 
-It is licensed under GPL v2.1.
+  It is licensed under GPL v2.1.
 */
 #include "fundamental.h"
 #include <stdio.h>
@@ -13,135 +13,135 @@ It is licensed under GPL v2.1.
 #include <stdlib.h>
 
 char *operator_str[num_operators+1]=
-{
+  {
 #ifdef HAVE_FACTORIAL_OP
-   "!",
+    "!",
 #endif
 #ifdef HAVE_ABS_OP
-   "abs",
+    "abs",
 #endif
 #ifdef HAVE_FLOOR_OP
-   "floor",
+    "floor",
 #endif
 #ifdef HAVE_CEIL_OP
-   "ceil",
+    "ceil",
 #endif
 #ifdef HAVE_RINT_OP
-   "rint",
+    "rint",
 #endif
 #ifdef HAVE_SIN_OP
-   "sin",
+    "sin",
 #endif
 #ifdef HAVE_COS_OP
-   "cos",
+    "cos",
 #endif
 #ifdef HAVE_TAN_OP
-   "tan",
+    "tan",
 #endif
 #ifdef HAVE_ONES_COMPLIMENT_OP
-   "compliment",
+    "compliment",
 #endif
 #ifdef HAVE_NOT_OP
-   "not",
+    "not",
 #endif
 #ifdef HAVE_ADDITION_OP
-   "+",
+    "+",
 #endif
 #ifdef HAVE_SUBTRACTION_OP
-   "-",
+    "-",
 #endif
 #ifdef HAVE_MULTIPLY_OP
-   "*",
+    "*",
 #endif
 #ifdef HAVE_DIVIDE_OP
-   "/",
+    "/",
 #endif
 #ifdef HAVE_POWER_OP
-   "power",
+    "power",
 #endif
 #ifdef HAVE_MODULO_OP
-   "%",
+    "%",
 #endif
 #ifdef HAVE_AND_OP
-   "and",
+    "and",
 #endif
 #ifdef HAVE_OR_OP
-   "or",
+    "or",
 #endif
 #ifdef HAVE_XOR_OP
-   "xor",
+    "xor",
 #endif
 #ifdef HAVE_LOG_SHIFT_OP
-   "log_shift",
+    "log_shift",
 #endif
 #ifdef HAVE_LOG_RSHIFT_OP
-   "log_rshift",
+    "log_rshift",
 #endif
 #ifdef HAVE_LOG_LSHIFT_OP
-   "log_lshift",
+    "log_lshift",
 #endif
 #ifdef HAVE_ARITH_SHIFT
-   "arith_shift",
+    "arith_shift",
 #endif
 #ifdef HAVE_ROTATE_OP
-   "rotate",
+    "rotate",
 #endif
 #ifdef HAVE_LROTATE_OP
-   "lrotate",
+    "lrotate",
 #endif
 #ifdef HAVE_RROTATE_OP
-   "rrotate",
+    "rrotate",
 #endif
 #ifdef HAVE_MASK_OP
-   "mask",
+    "mask",
 #endif
 #ifdef HAVE_GETBIT_OP
-   "getbit",
+    "getbit",
 #endif
 #ifdef HAVE_LN_OP
-   "ln",
+    "ln",
 #endif
 #ifdef HAVE_GCD_OP
-   "gcd",
+    "gcd",
 #endif
 #ifdef HAVE_EQ_COND
-   "==",
+    "==",
 #endif
 #ifdef HAVE_GT_COND
-   ">",
+    ">",
 #endif
 #ifdef HAVE_GE_COND
-   ">=",
+    ">=",
 #endif
 #ifdef HAVE_LT_COND
-   "<",
+    "<",
 #endif
 #ifdef HAVE_LE_COND
-   "<=",
+    "<=",
 #endif
 #ifdef HAVE_AND_COND
-   "&&",
+    "&&",
 #endif
 #ifdef HAVE_OR_COND
-   "||",
+    "||",
 #endif
 #ifdef HAVE_MIN_OP
-   "min",
+    "min",
 #endif
 #ifdef HAVE_MAX_OP
-   "max",
+    "max",
 #endif
-   (char *)0xdeadbeef,
-};
+    (char *)0xdeadbeef,
+  };
 
 
 #ifdef MAX_NUM_LOOPVARS
 void print_tabs(int num_tabs)
 {
-   int idx;
+  int idx;
 
-   for(idx=0;idx<num_tabs;idx++)
-      printf("  ");
+  for(idx=0;idx<num_tabs;idx++)
+    printf("  ");
 }
 #endif
 
@@ -150,35 +150,35 @@ void print_tabs(int num_tabs)
 void print_sum_preamble(sum_t *sum)
 {
 #ifdef MULTIPLE_RESULTS
-   dimension_t curr_result;
+  dimension_t curr_result;
 #endif
 #ifdef HAVE_FUNCTIONS
-   printf("seed=%d ",sum->seed);
+  printf("seed=%d ",sum->seed);
 #endif
 #ifdef MULTIPLE_RESULTS
-   for(curr_result=0;curr_result<MAX_NUM_RESULTS;curr_result++)
-      if(retvals[curr_result]==sequence_array_size)
-	 printf("result=%d ",curr_result);
+  for(curr_result=0;curr_result<MAX_NUM_RESULTS;curr_result++)
+    if(retvals[curr_result]==sequence_array_size)
+      printf("result=%d ",curr_result);
 #endif
-   printf("\n");
+  printf("\n");
 #if MAX_NUM_LOOPVARS
 #ifdef HAVE_RESULT_LOOPVAR
-   printf("cum_result="NUMBER_FORMAT"\n",sum->result_loopvar);
+  printf("cum_result="NUMBER_FORMAT"\n",sum->result_loopvar);
 #else 
-   printf("cum_result=0\n");
+  printf("cum_result=0\n");
 #endif
-   {
-      int idx;
-      looptype_t *curr_looptype;
-      for(idx=0;idx<sum->num_loopvars;idx++)
+  {
+    int idx;
+    looptype_t *curr_looptype;
+    for(idx=0;idx<sum->num_loopvars;idx++)
       {
-	 curr_looptype=&looptypes[sum->looptype_idx[idx]];
-	 print_tabs(idx);
-	 printf("for lv[%d]="LOOPVAR_FORMAT" to "LOOPVAR_FORMAT" lv[%d]%s\n",
-		idx,curr_looptype->initial_val,curr_looptype->final_val,
-		idx,curr_looptype->loopstr);     
+	curr_looptype=&looptypes[sum->looptype_idx[idx]];
+	print_tabs(idx);
+	printf("for lv[%d]="LOOPVAR_FORMAT" to "LOOPVAR_FORMAT" lv[%d]%s\n",
+	       idx,curr_looptype->initial_val,curr_looptype->final_val,
+	       idx,curr_looptype->loopstr);     
       }
-   }
+  }
 #endif
 }
 #endif
@@ -191,335 +191,335 @@ int pass;
 #endif
 void recurse_sum_infix(depth_t rec_depth,sum_t *sum)
 {
-   stack_entry *curr=&sum->stack[rec_depth];
-   struct infix_tree *curr_tree_member=tree_members[rec_depth];
-   depth_t curr_child;
-   operation op;
+  stack_entry *curr=&sum->stack[rec_depth];
+  struct infix_tree *curr_tree_member=tree_members[rec_depth];
+  depth_t curr_child;
+  operation op;
 #ifdef SIGNED_OPERATION
-   if(curr->minus)
-      printf("-");
+  if(curr->minus)
+    printf("-");
 #endif
    
-   switch(curr->tag)
-   {
+  switch(curr->tag)
+    {
 #ifdef SEQUENCE_HUNTER
 #ifdef HAVE_FUNCTIONS
-      case  function_tag:
-	 printf("f");
-	 goto print_comma_seperated;
-	 break;
+    case  function_tag:
+      printf("f");
+      goto print_comma_seperated;
+      break;
 #endif
-      case dimension_tag:
-	 printf("n["DIMENSION_FORMAT"]",curr->val);
-	 break;
+    case dimension_tag:
+      printf("n["DIMENSION_FORMAT"]",curr->val);
+      break;
 #endif
 #ifdef HAVE_CONSTANTS_FILE
-      case constant_tag:
-	 if(pass)
-	    printf(NUMBER_FORMAT" ",fundamental_list[curr->val]->value);
-	 else
-	    printf("%s",fundamental_list[curr->val]->name);
-	 break;
+    case constant_tag:
+      if(pass)
+	printf(NUMBER_FORMAT" ",fundamental_list[curr->val]->value);
+      else
+	printf("%s",fundamental_list[curr->val]->name);
+      break;
 #endif
 #if MAX_NUM_LOOPVARS
-      case loopvar_tag:
-	 printf("lv["LOOPVAR_FORMAT"]",curr->val);
-	 break; 
+    case loopvar_tag:
+      printf("lv["LOOPVAR_FORMAT"]",curr->val);
+      break; 
 #endif
-      case integer_tag:
-	 printf(STACKVAL_FORMAT,curr->val);
-	 break;
-      case arithmetic_operation_tag:
-	 op=curr->val;
+    case integer_tag:
+      printf(STACKVAL_FORMAT,curr->val);
+      break;
+    case arithmetic_operation_tag:
+      op=curr->val;
 #ifdef HAVE_UNARY_OPERATORS
-	 if(curr_tree_member->depth==1)
-	 {
-	    switch(op)
+      if(curr_tree_member->depth==1)
+	{
+	  switch(op)
 	    {
 #ifdef HAVE_FACTORIAL_OP
-	       case factorial_op:
-		  printf("(");
-		  recurse_sum_infix(curr_tree_member->child[0],sum);
-		  printf(")%s",operator_str[curr->val]);
-		  break;
+	    case factorial_op:
+	      printf("(");
+	      recurse_sum_infix(curr_tree_member->child[0],sum);
+	      printf(")%s",operator_str[curr->val]);
+	      break;
 #endif
-	       default:
-		  printf("%s(",operator_str[curr->val]);
-		  recurse_sum_infix(curr_tree_member->child[0],sum);
-		  printf(")");
-		  break;
+	    default:
+	      printf("%s(",operator_str[curr->val]);
+	      recurse_sum_infix(curr_tree_member->child[0],sum);
+	      printf(")");
+	      break;
 	    }
-	 }
-	 else
+	}
+      else
 #endif
 #ifdef HAVE_BINARY_OPERATORS
-	 {
-	    switch(op)
+	{
+	  switch(op)
 	    {
 #ifdef HAVE_ADDITION_OP
-	       case addition_op:
+	    case addition_op:
 #endif
 #ifdef HAVE_SUBTRACTION_OP
-	      case subtraction_op:
+	    case subtraction_op:
 #endif
 #ifdef HAVE_MULTIPLY_OP
-	      case multiply_op:
+	    case multiply_op:
 #endif
 #ifdef HAVE_DIVIDE_OP
-	      case divide_op:
+	    case divide_op:
 #endif
 #ifdef HAVE_MODULO_OP
-	      case modulo_op:
+	    case modulo_op:
 #endif
 #ifdef HAVE_AND_OP
-	       case and_op:
+	    case and_op:
 #endif
 #ifdef HAVE_OR_OP
-	      case or_op:
+	    case or_op:
 #endif
 #ifdef HAVE_XOR_OP
-	      case xor_op:
+	    case xor_op:
 #endif
 #ifdef HAVE_LOG_SHIFT_OP
-	      case log_shift_op:
+	    case log_shift_op:
 #endif
 #ifdef HAVE_LOG_RSHIFT_OP
-	       case log_rshift_op:
+	    case log_rshift_op:
 #endif
 #ifdef HAVE_LOG_LSHIFT_OP
-	       case log_lshift_op:
+	    case log_lshift_op:
 #endif
 #ifdef HAVE_ARITH_SHIFT_OP
-	       case arith_shift_op:
+	    case arith_shift_op:
 #endif
 #ifdef HAVE_ROTATE_OP
-	       case rotate_op:
+	    case rotate_op:
 #endif
 #ifdef HAVE_LROTATE_OP
-	       case lrotate_op:
+	    case lrotate_op:
 #endif
 #ifdef HAVE_RROTATE_OP
-	       case rrotate_op:
+	    case rrotate_op:
 #endif
-		  printf("(");
-		  recurse_sum_infix(curr_tree_member->child[0],sum);
+	      printf("(");
+	      recurse_sum_infix(curr_tree_member->child[0],sum);
 #if defined(ARITHMETIC_OPERATORS)&&defined(SIGNED_OPERATION)
-		  if(op!=addition||!stack[curr_tree_member->child[1]].minus)
+	      if(op!=addition||!stack[curr_tree_member->child[1]].minus)
 #endif
-		     printf(" %s ",operator_str[curr->val]);
-		  recurse_sum_infix(curr_tree_member->child[1],sum);
-		  printf(")"); 
-		  break;
+		printf(" %s ",operator_str[curr->val]);
+	      recurse_sum_infix(curr_tree_member->child[1],sum);
+	      printf(")"); 
+	      break;
 		  
-	       default:
-		  printf("%s",operator_str[curr->val]);
-		  goto print_comma_seperated;
+	    default:
+	      printf("%s",operator_str[curr->val]);
+	      goto print_comma_seperated;
 	    }
-	 }
+	}
 #endif
-	 break;
-   }
-   return;
-  print_comma_seperated:
-   printf("(");
-   for(curr_child=0;curr_child<curr_tree_member->depth;curr_child++)
-   {
+      break;
+    }
+  return;
+ print_comma_seperated:
+  printf("(");
+  for(curr_child=0;curr_child<curr_tree_member->depth;curr_child++)
+    {
       recurse_sum_infix(curr_tree_member->child[curr_child],sum);
       if(curr_child<curr_tree_member->depth-1)
-	 printf(",");
-   }
-   printf(")");
-   return;
+	printf(",");
+    }
+  printf(")");
+  return;
 }
   
 void print_sum_infix(sum_t *sum)
 {
-   struct infix_tree  *curr_tree_member; 
-   int idx,idx1;
-   depth_t depth;
+  struct infix_tree  *curr_tree_member; 
+  int idx,idx1;
+  depth_t depth;
 
-   stack_entry *curr;
-   memset(tree_members,0,sizeof(struct infix_tree *)*sum->stack_depth);
-   for(idx=0;idx<sum->stack_depth;idx++)
-   {
+  stack_entry *curr;
+  memset(tree_members,0,sizeof(struct infix_tree *)*sum->stack_depth);
+  for(idx=0;idx<sum->stack_depth;idx++)
+    {
       curr=&sum->stack[idx];
       depth=(is_operator(curr->tag) ? get_op_depth(curr):0);
       curr_tree_member=tree_members[idx]=alloca(offsetof(struct infix_tree,child[depth]));
       curr_tree_member->has_parent=FALSE;
       curr_tree_member->depth=depth;
       for(idx1=idx-1;idx1>=0&&depth>0;idx1--)
-      {
-	 if(!tree_members[idx1]->has_parent)
-	 {
-	    tree_members[idx1]->has_parent=TRUE;
-	    curr_tree_member->child[--depth]=idx1;
-	 }
-      }
+	{
+	  if(!tree_members[idx1]->has_parent)
+	    {
+	      tree_members[idx1]->has_parent=TRUE;
+	      curr_tree_member->child[--depth]=idx1;
+	    }
+	}
       if(depth!=0)
-	 exit_error("bug in  print_sum_infix\n");
-   }
+	exit_error("bug in  print_sum_infix\n");
+    }
 #ifdef HAVE_CONSTANTS_FILE
-   for(pass=0;pass<(fundamental_list ? 2:1);pass++)
+  for(pass=0;pass<(fundamental_list ? 2:1);pass++)
 #endif
-   {
+    {
 #if MAX_NUM_LOOPVARS
       print_tabs(sum->num_loopvars);
       printf("result=");
 #endif
       recurse_sum_infix(sum->stack_depth-1,sum);
       printf("\n");
-   }
+    }
 }
 #endif
 
 #ifdef HAVE_PRINT_SUM_RPN
 void print_sum_rpn(sum_t *sum)
 {
-   int idx
+  int idx
 #ifdef HAVE_CONSTANTS_FILE
-      ,pass
+    ,pass
 #endif
-      ;
-   stack_entry *curr;
+    ;
+  stack_entry *curr;
 #ifdef HAVE_CONSTANTS_FILE
-   for(pass=0;pass<(fundamental_list ? 2:1);pass++)
+  for(pass=0;pass<(fundamental_list ? 2:1);pass++)
 #endif
-   {
+    {
 #if MAX_NUM_LOOPVARS
       print_tabs(sum->num_loopvars);
       printf("result=");
 #endif
       for(idx=0;idx<sum->stack_depth;idx++)
-      {
-	 curr=&sum->stack[idx];
+	{
+	  curr=&sum->stack[idx];
 #ifdef SIGNED_OPERATION
-	 if(curr->minus)
+	  if(curr->minus)
 	    printf("-");
 #endif
-	 switch(curr->tag)
-	 {
+	  switch(curr->tag)
+	    {
 #ifdef SEQUENCE_HUNTER
 #ifdef HAVE_FUNCTIONS
 	    case  function_tag:
-	       printf("f ");
-	       break;
+	      printf("f ");
+	      break;
 #endif
 	    case dimension_tag:
-	       printf("n["DIMENSION_FORMAT"] ",curr->val);
-               break;
+	      printf("n["DIMENSION_FORMAT"] ",curr->val);
+	      break;
 #endif
 #ifdef HAVE_CONSTANTS_FILE
 	    case constant_tag:
-	       if(pass)
-		  printf(NUMBER_FORMAT" ",fundamental_list[curr->val]->value);
-	       else
-		  printf("%s ",fundamental_list[curr->val]->name);
-	       break;
+	      if(pass)
+		printf(NUMBER_FORMAT" ",fundamental_list[curr->val]->value);
+	      else
+		printf("%s ",fundamental_list[curr->val]->name);
+	      break;
 #endif
 #if MAX_NUM_LOOPVARS
-      case loopvar_tag:
-	 printf("lv["LOOPVAR_FORMAT"] ",curr->val);
-	 break; 
+	    case loopvar_tag:
+	      printf("lv["LOOPVAR_FORMAT"] ",curr->val);
+	      break; 
 #endif
 	    case integer_tag:
-	       printf(STACKVAL_FORMAT,curr->val);
-	       break;
+	      printf(STACKVAL_FORMAT" ",curr->val);
+	      break;
 	    case arithmetic_operation_tag:
-	       printf(" %s ",operator_str[curr->val]);
-	       break;
-	 }
-      }
+	      printf(" %s ",operator_str[curr->val]);
+	      break;
+	    }
+	}
       printf("\n");
-   }
+    }
 }
 #endif
 
 void print_sum_postamble(sum_t *sum)
 {
 #if MAX_NUM_LOOPVARS
-   int idx;
-   for(idx=sum->num_loopvars-1;idx>=0;idx--)
-   {
-	 print_tabs(idx+1);
-	 printf("cum_result=cum_result %s result\n",operator_str[sum->loopvar_stack[idx].val]);
-   }
+  int idx;
+  for(idx=sum->num_loopvars-1;idx>=0;idx--)
+    {
+      print_tabs(idx+1);
+      printf("cum_result=cum_result %s result\n",operator_str[sum->loopvar_stack[idx].val]);
+    }
 #endif
-   if(max_num_answers!=-1)
-   {
+  if(max_num_answers!=-1)
+    {
       num_answers++;
       if(num_answers>=max_num_answers)
-	 exit(0);
-   }
+	exit(0);
+    }
 }
 
 void print_sum(sum_t *sum)
 {
-	PRINT_SUM(sum);
+  PRINT_SUM(sum);
 }
 
 #ifdef HAVE_ERROR_MEASUREMENTS
 char *error_measurment_str[NUM_ERROR_MEASUREMENTS]=
-{
+  {
 #ifdef HAVE_LMS_ERROR
-	"lms",
+    "lms",
 #endif
 #ifdef HAVE_ABS_ERROR
-	"abs",
+    "abs",
 #endif
 #ifdef HAVE_LMS_RATIOED_ERROR
-	"lms ratioed",
+    "lms ratioed",
 #endif
 #ifdef HAVE_ABS_RATIOED_ERROR
-	"abs ratioed",
+    "abs ratioed",
 #endif
 #ifdef HAVE_LMS_GT_ERROR
-	"lms gt",
+    "lms gt",
 #endif
 #ifdef HAVE_GT_ERROR
-	"gt",
+    "gt",
 #endif
 #ifdef HAVE_LMS_GT_RATIOED_ERROR
-	"lms gt ratioed",
+    "lms gt ratioed",
 #endif
 #ifdef HAVE_GT_RATIOED_ERROR
-	"gt ratioed",
+    "gt ratioed",
 #endif
 #ifdef HAVE_LMS_LT_ERROR
-	"lms lt",
+    "lms lt",
 #endif
 #ifdef HAVE_LT_ERROR
-	"lt error",
+    "lt error",
 #endif
 #ifdef HAVE_LMS_LT_RATIOED_ERROR
-	"lms lt ratioed",
+    "lms lt ratioed",
 #endif
 #ifdef HAVE_LT_RATIOED_ERROR
-	"lt ratioed",
+    "lt ratioed",
 #endif
-};
+  };
 
 #ifdef HAVE_DEBUG_ERROR_LIST
 void debug_error_list_func(calculate_sum_result *retval)
 {
   result_t testvals=*get_array_member(array_indices);
 #ifdef MULTIPLE_RESULTS
-   int curr_answer,num_answers=
+  int curr_answer,num_answers=
 #ifdef NUM_ANSWERS
-      NUM_ANSWERS
+    NUM_ANSWERS
 #else
-      testvals->num_answers
+    testvals->num_answers
 #endif
-      ;
-   number_t *answers=
+    ;
+  number_t *answers=
 #if (!defined(NUM_ANSWERS)||defined(SPARSE_ARRAY_INDICES))
-      &testvals->answer[0];
+    &testvals->answer[0];
 #else
-   &testvals.answer[0];
+  &testvals.answer[0];
 #endif
    
-   for(curr_answer=0;curr_answer<num_answers;curr_answer++)
+  for(curr_answer=0;curr_answer<num_answers;curr_answer++)
 #endif /* MULTIPLE_RESULTS */
-   {
+    {
       printf("result="NUMBER_FORMAT" expected="NUMBER_FORMAT"\n",
 	     result_stack[0],
 #ifdef MULTIPLE_RESULTS
@@ -527,39 +527,39 @@ void debug_error_list_func(calculate_sum_result *retval)
 #else
 	     testvals
 #endif
-	 );
-   }
+	     );
+    }
 }
 #endif
 
 void print_error_measurements()
 {
-   int idx;
+  int idx;
 
-   for(idx=0;idx<NUM_ERROR_MEASUREMENTS;idx++)
-   {
+  for(idx=0;idx<NUM_ERROR_MEASUREMENTS;idx++)
+    {
       struct list_head *curr_error_list=&error_list[idx];
       error_list_element *element;
       if(!list_empty(curr_error_list))
-      {
-	 printf("%s error list\n",error_measurment_str[idx]);
-	 list_for_each(((struct list_head *)element),curr_error_list)
+	{
+	  printf("%s error list\n",error_measurment_str[idx]);
+	  list_for_each(((struct list_head *)element),curr_error_list)
 	    {
-	       printf("error="ERROR_FORMAT"\n",element->error_val);
-	       print_sum(&element->sum);
+	      printf("error="ERROR_FORMAT"\n",element->error_val);
+	      print_sum(&element->sum);
 #ifdef HAVE_DEBUG_ERROR_LIST
-	       {
-		  calculate_sum_result result=calculate_sum(&element->sum,debug_error_list_func);
-		  if(result.aborted)
+	      {
+		calculate_sum_result result=calculate_sum(&element->sum,debug_error_list_func);
+		if(result.aborted)
 		  {
-		     fprintf(stderr,"BUG DEBUG_ERROR_LIST sum is illegal");
-		     print_sum(&element->sum);
-		     exit(-1);
+		    fprintf(stderr,"BUG DEBUG_ERROR_LIST sum is illegal");
+		    print_sum(&element->sum);
+		    exit(-1);
 		  }
-	       }
+	      }
 #endif
 	    }
-      }
-   }
+	}
+    }
 }
 #endif

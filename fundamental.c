@@ -323,7 +323,7 @@ int increment_loopvar_operators()
       else
 	 break;
    }
-   return(idx>=curr_num_loopvars1);
+   return(idx>=sum->num_loopvars);
 }
 
 int check_all_loopvars_used()
@@ -819,12 +819,12 @@ int increment_sum_order()
 #ifdef MAX_NUM_LOOPVARS
       if(num_loopvars<sum->num_loopvars)
 	 goto retry;
-      if(sum->num_loopvars>1)
+      if(sum->num_loopvars>0)
       {
+	 int loopvar_val=curr_num_loopvars1;	   
 	 /* change the loopvars to the lowest valid order */
 	 for(idx=SKIP_DEPTH;idx<sum->stack_depth;idx++)
 	 {
-	    int loopvar_val=curr_num_loopvars1;
 	    curr=&sum->stack[idx];
 	    if(curr->tag==loopvar_tag)
 	       curr->val=loopvar_val--;
@@ -842,12 +842,19 @@ int increment_sum_order()
 int init_stack_list()
 {
    int idx;
+   int retval=0;
 
    for(idx=SKIP_DEPTH;idx<sum->stack_depth;idx++)
       init_number(&sum->stack[idx]);
    if(sum->stack_depth>1)
-      return increment_sum_order();
-   return 0;
+      retval=increment_sum_order();
+   if(retval)
+     return retval;
+#if MAX_NUM_LOOPVARS
+   if(!check_all_loopvars_used())
+     retval=increment_numbers();
+#endif
+   return retval;
 }
 
 int increment_operators(depth_t depth)
@@ -1647,7 +1654,7 @@ int main(int argc,char *argv[])
 			       ,FALSE
 #endif
 	       );
-#if 0 /* looks like old code */
+#if 1 /* looks like old code */
 	    idx=optind+2+NUM_SEQUENCE_DIMENSIONS;
 #endif
 #if defined(MULTIPLE_RESULTS) && !defined(NUM_ANSWERS)
