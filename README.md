@@ -104,4 +104,6 @@ The section of the code enabled loops ( e.g. needed to find the Taylor series ex
 
 ## Documentation
 
-Fundamental now contains a Fundamental Overview.doc readme explaining most of the internals of fundamental, please feel welcome to send questions to me at dj_barrow@ariasoft.ie and I will add detail to the document explaining your concern.
+Fundamental now contains a Fundamental Overview.doc readme explaining most of the internals of fundamental, please feel welcome to send questions to me at barrow_dj@yahoo.com and I will add detail to the document explaining your concern.
+
+P.S. Remember gdb is your friend when pulling out bugs use it you can call print_sum directly from the debugger to see how the sum trials are progressing.
