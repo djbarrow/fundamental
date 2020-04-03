@@ -84,6 +84,13 @@ I browsed through the code of fundamental a bit.
 I find the idea brilliant, and I think this might be worth drilling deeper.  
 
 </a>
+<a>
+ Andrea said this after examining the code and me fixing a minor bug to get it going for him.
+Hello D.J.
+sorry for the long time to answer...
+i have had too many argument to study to understand well that ,,,
+I think your work it's absolutely fabulous !
+</a>
 
 <a></a>[Fabrice Bellard](http://en.wikipedia.org/wiki/Fabrice_Bellard) <a>didn't directly sing it's praises but here is what he'd to say  
 Someone told me about a similar project some time ago and I find the idea interesting. Of course the problem is to limit the exponential growth of the search space. I guess that an exhaustive search cannot lead to very interesting discoveries because the programs are too small. But there may be ways to explore a subspace of the "interesting" possible programs with a well chosen language and search algorithm.</a>
