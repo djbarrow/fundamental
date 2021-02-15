@@ -14,9 +14,7 @@ It could have found [Planck's Law](http://en.wikipedia.org/wiki/Planck%27s_law) 
 It could with some improvements in pattern matching have found Mendeleev's periodic table of elements or did some of Murray Gell Mann's work for which he got a Nobel Prize in 1969 for developing the Standard Model in Physics.
 
 To date I've had little luck in coming up with a fast formula for factorising large large numbers but God loves a tryer.
-However it did find this gem which looks dimensionally correct
-relating the constants of physics to the golden ratio.
-A program I wrote called fundamental might have made a scientific discovery
+# However it did find this gem which looks dimensionally correct relating the constants of physics to the golden ratio.
 
 Found match error=4.714556e-05 fundamental constant name=mass_of_neutron value=1.674929e-27
 (mass_of_proton + (mass_of_electron + (mass_of_electron * golden_ratio)))
