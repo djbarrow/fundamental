@@ -17,7 +17,9 @@ To date I've had little luck in coming up with a fast formula for factorising la
 # However it did find this gem which looks dimensionally correct relating the constants of physics to the golden ratio.
 
 Found match error=4.714556e-05 fundamental constant name=mass_of_neutron value=1.674929e-27
+
 (mass_of_proton + (mass_of_electron + (mass_of_electron * golden_ratio)))
+
 (1.672623e-27  + (9.109390e-31  + (9.109390e-31  * 1.618034e+00 )))
 
 In short it's for hacking the laws of nature & mathematics
