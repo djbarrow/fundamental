@@ -1,3 +1,6 @@
+#if defined(SEQUENCE_HUNTER) || defined(REAL_HUNTER)
+#define HUNTER
+#endif
 #ifdef NUM_INTEGER_BITS
 #if (NUM_INTEGER_BITS>64||NUM_INTEGER_BITS<=0)
 #error "Illegal NUM_INTEGER_BITS definition."
@@ -31,8 +34,8 @@
 #error "NUM_ANSWERS defined without MULTIPLE_RESULTS"
 #endif
 #endif
-#if !defined(SEQUENCE_HUNTER)&& !defined(HAVE_CONSTANTS_FILE)
-#error "SEQUENCE_HUNTER or HAVE_CONSTANTS_FILE need to be defined"
+#if !defined(HUNTER)&& !defined(HAVE_CONSTANTS_FILE)
+#error "SEQUENCE_HUNTER or REAL_HUNTER or HAVE_CONSTANTS_FILE need to be defined"
 #endif
 
 
@@ -57,4 +60,10 @@
 #endif
 #if defined(HAVE_DEBUG_ERROR_LIST) && !defined (HAVE_ERROR_MEASUREMENTS)
 #error "HAVE_DEBUG_ERROR_LIST definition needs HAVE_ERROR_MEASUREMENTS definition."
+#endif
+#if defined(REAL_HUNTER) && defined (HAVE_FUNCTIONS)
+#error "REAL_HUNTER and HAVE_FUNCTIONS cannot be defined simultaineously."
+#endif
+#if defined(REAL_HUNTER) && defined (SEQUENCE_HUNTER)
+#error "REAL_HUNTER and SEQUENCE_HUNTER cannot be defined simultaineously."
 #endif

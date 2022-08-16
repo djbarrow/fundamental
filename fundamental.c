@@ -21,7 +21,14 @@ It is licensed under GPL v2.1
 struct timeval *starttime;
 #endif
 
-
+#ifdef REAL_HUNTER
+#include "csv.h"
+number_t *coord_and_result_array=NULL;
+int real_coord_idx=0,num_real_coord_idx=0;
+#ifndef NUM_HUNTER_DIMENSIONS
+number_t NUM_HUNTER_DIMENSIONS=1;
+#endif
+#else
 #ifdef SEQUENCE_HUNTER
 dimension_t
 #ifdef HAVE_FUNCTIONS 
@@ -40,7 +47,7 @@ dimension_t *retvals;
 dimension_t MAX_NUM_RESULTS;
 #endif
 #endif
-
+#endif // REAL_HUNTER
 
 
 #ifdef HAVE_CONSTANTS_FILE
@@ -503,6 +510,24 @@ int number_to_int_t(number_t *numval,int_t *intval)
 } 
 #endif
 
+#ifdef REAL_HUNTER
+#define get_dimension(coord_idx,dimension) (number_t)coord_and_result_array[((NUM_HUNTER_DIMENSIONS+1)*(int)(coord_idx))+dimension]
+#define  get_real_member(coord_idx) (result_t)coord_and_result_array[((NUM_HUNTER_DIMENSIONS+1)*(int)(coord_idx))+NUM_HUNTER_DIMENSIONS]
+int increment_real_coord_idx()
+{
+   real_coord_idx++;
+   if(real_coord_idx>num_real_coord_idx)
+   {
+      real_coord_idx=0;
+      return 1;
+   }
+   return 0;
+}
+void init_real_coord_idx()
+{
+   real_coord_idx=0;
+}
+#else
 #ifdef SEQUENCE_HUNTER
 result_t *get_array_member(dimension_t *array_indices)
 {
@@ -612,7 +637,7 @@ int cast_to_dimensions(dimension_t *dimensions,dimension_t *max_dimensions,numbe
 }
 #endif
 #endif
-
+#endif /* REAL_HUNTER */
 typedef struct
 {
       long lo_val;
@@ -625,7 +650,7 @@ number_range_t number_range[last_number_tag+1]=
 #if MAX_NUM_LOOPVARS
    {0,MAX_NUM_LOOPVARS,0},
 #endif
-#ifdef SEQUENCE_HUNTER
+#ifdef HUNTER
    {0,-1,0},
 #endif
 #ifdef HAVE_CONSTANTS_FILE
@@ -750,7 +775,7 @@ int increment_sum_order()
 #if MAX_NUM_LOOPVARS
 	 case loopvar_tag:
 #endif
-#ifdef SEQUENCE_HUNTER
+#ifdef HUNTER
 	 case dimension_tag:
 #endif
 #ifdef HAVE_CONSTANTS_FILE
@@ -1085,7 +1110,7 @@ int increment_functions()
       if(curr->tag==function_tag)
       {
 	 if(curr->minus==FALSE)
-	 {
+	{
 	    curr->minus=TRUE;
 	    break;
 	 }
@@ -1098,6 +1123,7 @@ int increment_functions()
 #endif
 #endif
 #else
+#ifdef HAVE_CONSTANTS_FILE
 int check_sum()
 {
    int idx1,idx2;   
@@ -1133,6 +1159,7 @@ int check_sum()
    }
    return(-1);
 }
+#endif
 #endif
 
 
@@ -1174,7 +1201,7 @@ int sum_switch(stack_entry *curr)
 	    *curr_result_ptr++=loopvar[curr->val];
 	 break;
 #endif
-#ifdef SEQUENCE_HUNTER
+#ifdef HUNTER
 #ifdef HAVE_FUNCTIONS
       case function_tag:
 	 function_result_ptr=(curr_result_ptr-NUM_SEQUENCE_DIMENSIONS);
@@ -1193,10 +1220,24 @@ int sum_switch(stack_entry *curr)
       case dimension_tag: 
 #ifdef SIGNED_OPERATION
 	 if(curr->minus)
-	    *curr_result_ptr++=-array_indices[curr->val];
+	    *curr_result_ptr++=
+#ifdef SEQUENCE_HUNTER
+	      -array_indices[curr->val]
+#endif
+#ifdef REAL_HUNTER
+	      -get_dimension(real_coord_idx,curr->val)
+#endif
+	      ;
 	 else
 #endif
-	    *curr_result_ptr++=array_indices[curr->val];
+	    *curr_result_ptr++=
+#ifdef SEQUENCE_HUNTER
+	      array_indices[curr->val]
+#endif
+#ifdef REAL_HUNTER
+	       get_dimension(real_coord_idx,curr->val)
+#endif
+	      ;
 	 break;
 #endif
 #ifdef HAVE_CONSTANTS_FILE
@@ -1233,8 +1274,16 @@ void sum_correct_func(calculate_sum_result *retval)
 {
       if(!retval->aborted)
       {
+
+#ifdef HUNTER
+	 if(!result_correct(
+#ifdef REAL_HUNTER
+	       get_real_member(real_coord_idx)
+#endif
 #ifdef SEQUENCE_HUNTER
-	 if(!result_correct(*get_array_member(array_indices)))
+	       *get_array_member(array_indices)
+#endif
+	       ))
 	    retval->sum_correct=FALSE;
 	 
 #else
@@ -1255,6 +1304,7 @@ calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func)
    
    calculate_sum_result retval;
    retval.sum_correct=TRUE;
+#ifdef HUNTER
 #ifdef SEQUENCE_HUNTER
 #ifdef MULTIPLE_RESULTS
    memset(retvals,0,MAX_NUM_RESULTS*sizeof(*retvals));
@@ -1269,9 +1319,13 @@ calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func)
       ,TRUE
 #endif
       );
+#endif
+#ifdef REAL_HUNTER
+   init_real_coord_idx();
+#endif
    do
    {
-#endif /* SEQUENCE_HUNTER */
+#endif /* HUNTER */
 #if MAX_NUM_LOOPVARS
       int inc_lv_retval;
 #ifdef HAVE_RESULT_LOOPVAR
@@ -1307,14 +1361,16 @@ calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func)
 #endif
      skip:;
       sum_func(&retval);
-#ifdef SEQUENCE_HUNTER
+#ifdef HUNTER
    } while(!retval.aborted&&(retval.sum_correct
 #ifdef HAVE_ERROR_MEASUREMENTS
 		      ||error_sums_good()
 #endif
 	      )
 	   
-	   &&!increment_array_indices(
+	   &&
+#ifdef SEQUENCE_HUNTER
+	   !increment_array_indices(
 #ifdef HAVE_FUNCTIONS
 	      sum->seed
 #else
@@ -1323,8 +1379,12 @@ calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func)
 #ifdef SPARSE_ARRAY_INDICES
 	      ,TRUE
 #endif
-	      ));
 #endif /* SEQUENCE_HUNTER */
+#ifdef REAL_HUNTER
+	      !increment_real_coord_idx(
+#endif
+	      ));
+#endif /* HUNTER */
    return retval;
 }
 
@@ -1471,6 +1531,36 @@ static void signal_print_error_measurements(int signal)
 }
 #endif
 
+void init_sequence(int argc,char *argv[],int curropt)
+{
+  int idx;
+   sequence_dimension=myalloc("sequence_dimension",NUM_SEQUENCE_DIMENSIONS*sizeof(dimension_t));
+   array_indices=myalloc("array_indices",NUM_SEQUENCE_DIMENSIONS*sizeof(dimension_t));
+   temp_dimensions=myalloc("temp_dimensions",NUM_SEQUENCE_DIMENSIONS*sizeof(dimension_t));
+   sequence_dimension_multiplier=myalloc("sequence_dimension_multiplier",NUM_SEQUENCE_DIMENSIONS*sizeof(dimension_t));
+   sequence_array_size=1;
+   for(idx=0;idx<NUM_SEQUENCE_DIMENSIONS;idx++)
+   {
+      int temp_dimension=atoi(argv[curropt++]);
+      if(temp_dimension<=0)
+	 exit_error("Illegal sequence_dimension idx=%d dimension_val=%d\n",idx,temp_dimension);
+      sequence_dimension[idx]=temp_dimension;
+      sequence_dimension_multiplier[idx]=sequence_array_size;
+      sequence_array_size*=temp_dimension;
+      
+   }
+   sequence_array=myalloc("sequence_array",sizeof(result_t)*sequence_array_size);
+#if defined(SEED) && defined(SPARSE_ARRAY_INDICES)
+   memset(sequence_array,0,sizeof(result_t)*SEED);
+#endif
+   init_array_indices(MIN_SEED
+#ifdef SPARSE_ARRAY_INDICES
+		      ,FALSE
+#endif
+      );
+}
+
+
 int main(int argc,char *argv[])
 {
    stack_tag curr_number,next_number;
@@ -1503,6 +1593,10 @@ int main(int argc,char *argv[])
 #ifdef HAVE_CONSTANTS_FILE
 	       "c:"
 #endif
+#ifdef REAL_HUNTER
+	       "f:"
+	       "j:"
+#endif	       
 #ifdef SEQUENCE_HUNTER
 	       "f:i:s:l:"
 #endif
@@ -1606,7 +1700,16 @@ int main(int argc,char *argv[])
 #endif
 					       ));
 	    break;
-
+#ifdef REAL_HUNTER
+	 case 'f':
+#ifndef NUM_HUNTER_DIMENSIONS
+	    NUM_HUNTER_DIMENSIONS=atoi(optarg);
+#endif
+	    break;
+	 case 'j':
+	    readreals(optarg);
+	    break;
+#endif
 #ifdef SEQUENCE_HUNTER
 #ifndef MULTIPLE_RESULTS
 	 case 'f':
@@ -1630,30 +1733,7 @@ int main(int argc,char *argv[])
 	    if(max_seed<0||NUM_SEQUENCE_DIMENSIONS<1||min_seed>max_seed)
 	       goto error;
 #endif
-	    sequence_dimension=myalloc("sequence_dimension",NUM_SEQUENCE_DIMENSIONS*sizeof(dimension_t));
-	    array_indices=myalloc("array_indices",NUM_SEQUENCE_DIMENSIONS*sizeof(dimension_t));
-	    temp_dimensions=myalloc("temp_dimensions",NUM_SEQUENCE_DIMENSIONS*sizeof(dimension_t));
-	    sequence_dimension_multiplier=myalloc("sequence_dimension_multiplier",NUM_SEQUENCE_DIMENSIONS*sizeof(dimension_t));
-	    sequence_array_size=1;
-	    for(idx=0;idx<NUM_SEQUENCE_DIMENSIONS;idx++)
-	    {
-	       int temp_dimension=atoi(argv[curropt++]);
-	       if(temp_dimension<=0)
-		  exit_error("Illegal sequence_dimension idx=%d dimension_val=%d\n",idx,temp_dimension);
-	       sequence_dimension[idx]=temp_dimension;
-	       sequence_dimension_multiplier[idx]=sequence_array_size;
-	       sequence_array_size*=temp_dimension;
-	       
-	    }
-	    sequence_array=myalloc("sequence_array",sizeof(result_t)*sequence_array_size);
-#if defined(SEED) && defined(SPARSE_ARRAY_INDICES)
-	    memset(sequence_array,0,sizeof(result_t)*SEED);
-#endif
-	    init_array_indices(MIN_SEED
-#ifdef SPARSE_ARRAY_INDICES
-			       ,FALSE
-#endif
-	       );
+	    init_sequence(argc,argv,curropt);
 #if 1 /* looks like old code */
 	    idx=optind+2+NUM_SEQUENCE_DIMENSIONS;
 #endif
@@ -1744,15 +1824,20 @@ int main(int argc,char *argv[])
       }
    }
    if(
+#ifdef HUNTER
 #ifdef SEQUENCE_HUNTER
       !sequence_dimension
+#endif
+#ifdef REAL_HUNTER
+      !coord_and_result_array
+#endif
 #ifdef HAVE_CONSTANTS_FILE
       &&
 #endif
 #endif
 #ifdef HAVE_CONSTANTS_FILE
       !fundamental_list
-#endif 
+#endif
       )
       goto error;
 #ifdef HAVE_PROGRESS
@@ -1765,6 +1850,9 @@ int main(int argc,char *argv[])
 #endif
 #ifdef SEQUENCE_HUNTER
    number_range[dimension_tag].hi_val=NUM_SEQUENCE_DIMENSIONS-1;
+#endif
+#ifdef REAL_HUNTER
+    number_range[dimension_tag].hi_val=NUM_HUNTER_DIMENSIONS-1;
 #endif
 #ifdef HAVE_CONSTANTS_FILE
    if(fundamental_list)
@@ -1798,6 +1886,12 @@ int main(int argc,char *argv[])
 	      "<-a max_num_answers>"
 #ifdef HAVE_CONSTANTS_FILE
 	      " <-c constants file>"
+#endif
+#ifdef REAL_HUNTER
+#ifndef NUM_HUNTER_DIMENSIONS
+	      " -f num_hunter_dimensions "
+#endif
+       " -j csvfile "
 #endif
 #ifdef SEQUENCE_HUNTER
 	      " <<-s "

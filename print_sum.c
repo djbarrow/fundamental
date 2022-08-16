@@ -202,7 +202,7 @@ void recurse_sum_infix(depth_t rec_depth,sum_t *sum)
    
   switch(curr->tag)
     {
-#ifdef SEQUENCE_HUNTER
+#ifdef HUNTER
 #ifdef HAVE_FUNCTIONS
     case  function_tag:
       printf("f");
@@ -398,7 +398,7 @@ void print_sum_rpn(sum_t *sum)
 #endif
 	  switch(curr->tag)
 	    {
-#ifdef SEQUENCE_HUNTER
+#ifdef HUNTER
 #ifdef HAVE_FUNCTIONS
 	    case  function_tag:
 	      printf("f ");

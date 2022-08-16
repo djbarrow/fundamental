@@ -1,14 +1,16 @@
 #CC=gcc33
-CC=gcc
+CC=gcc-6
 OBJFILES = \
 fundamental.o \
 do_sum.o \
 utils.o \
 print_sum.o \
 fundtest.o \
+csv.o \
 simplify.o
-#factor_test.o
 #fundtest.o 
+#factor_test.o
+
 
 CFLAGS= -g -DLINUX 
 #CFLAGS=-O2 -g

@@ -7,6 +7,9 @@ It is licensed under GPL v2.1
 */
 
 #include "fundamental_config.h"
+#if defined(SEQUENCE_HUNTER) || defined(REAL_HUNTER)
+#define HUNTER
+#endif
 
 #if defined(HAVE_FACTORIAL_OP) || \
 defined(HAVE_ABS_OP) || \
@@ -268,30 +271,29 @@ extern result_t alloc_result(int num_answers);
 #endif /* NUM_ANSWERS */
 #endif
 
-
-
+#ifdef HUNTER
+#define MULTI_DIMENSIONAL (!defined(NUM_HUNTER_DIMENSIONS) || NUM_HUNTER_DIMENSIONS>1)
+#ifndef NUM_HUMTER_DIMENSIONS
+extern int NUM_HUMTER_DIMENSIONS;
+#endif
+#endif
 
 
 #ifdef SEQUENCE_HUNTER
 typedef unsigned long dimension_t;
+
 #ifdef HAVE_FUNCTIONS
 extern dimension_t curr_seed;
 #endif
 #define MAX_DIMENSION ((dimension_t)-1)
 #define DIMENSION_FORMAT "%lu"
-dimension_t sequence_array_size;
-#define MULTI_DIMENSIONAL (!defined(NUM_SEQUENCE_DIMENSIONS) || NUM_SEQUENCE_DIMENSIONS>1)
-#ifndef NUM_SEQUENCE_DIMENSION 
-extern dimension_t num_sequence_dimensions;
-#endif
-
 extern int sequence_func(result_t *retnums,dimension_t *array_indices);
 extern result_t *get_array_member(dimension_t *array_indices);
 #endif
-
-#ifndef NUM_SEQUENCE_DIMENSIONS
-extern dimension_t NUM_SEQUENCE_DIMENSIONS;
+#ifdef REAL_HUNTER
+#define DIMENSION_FORMAT "%lu"
 #endif
+
 
 typedef int depth_t;
 #define DEPTH_CHANGE_FORMAT "%d"
@@ -488,7 +490,7 @@ typedef enum
    /* The loopvar_tag has to be the first valid tag */
    loopvar_tag,
 #endif
-#ifdef SEQUENCE_HUNTER
+#ifdef HUNTER
    dimension_tag,
 #endif
 #ifdef HAVE_CONSTANTS_FILE
@@ -725,7 +727,19 @@ typedef struct
 typedef void (*calculate_sum_func_t)(calculate_sum_result *retval);
 extern calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func);
 #ifdef SEQUENCE_HUNTER
-extern dimension_t *array_indices;
+//extern dimension_t *array_indices;
 #endif
 extern number_t *result_stack;
 extern int max_stack_depth;
+#ifdef REAL_HUNTER
+extern number_t *coord_and_result_array;
+extern int num_real_coord_idx;
+#ifndef NUM_HUNTER_DIMENSIONS
+extern number_t NUM_HUNTER_DIMENSIONS;
+#endif
+#endif
+#ifdef SEQUENCE_HUNTER
+#ifndef NUM_SEQUENCE_DIMENSIONS
+extern dimension_t NUM_SEQUENCE_DIMENSIONS;
+#endif
+#endif

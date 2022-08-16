@@ -42,11 +42,10 @@
 
 
 /* General operation characteristics */
-#define SEQUENCE_HUNTER
-#define NUM_SEQUENCE_DIMENSIONS (2)
-//#define REAL_HUNTER
+//#define SEQUENCE_HUNTER
+#define REAL_HUNTER
 //#define HAVE_FUNCTIONS
-//#define NUM_HUNTER_DIMENSIONS (3)
+#define NUM_HUNTER_DIMENSIONS (3)
 //#define NUM_INTEGER_BITS   (32)
 //#define HAVE_CONSTANTS_FILE
 #define HAVE_PRINT_SUM_INFIX

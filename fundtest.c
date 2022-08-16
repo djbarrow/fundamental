@@ -76,7 +76,7 @@ int sequence_func(number_t *retnum,dimension_t *array_indices)
    return 0;
 }
 #endif
-#if 1
+#if 0
 double f_of_x(double x)
 {
   return sin(x*x);
@@ -129,6 +129,8 @@ void fundfill()
     }
   init=TRUE;
 }
+#endif
+#if 0
 int sequence_func(number_t *retnum,dimension_t *array_indices)
 {
 #if 0
@@ -147,7 +149,7 @@ int sequence_func(number_t *retnum,dimension_t *array_indices)
   return 1;
 }
 #endif
-#if 0
+#if 1
 int sequence_func(number_t *retnum,dimension_t *array_indices)
 {
    *retnum=array_indices[0]+array_indices[1];
