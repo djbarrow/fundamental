@@ -4,9 +4,13 @@ Fundamental is a c command line program, a rough diamond which barely works beau
 NEW FEATURE
 Fundamental can now find the formula of a field entered as individual points
 e.g.
+
 1,2,0,3
+
 0,2,3,5
+
 0,3,2,5
+
 4,5,0,9
 
 The first 3 values in this field are x,y,z coordinates the last value is the field value will yield the formula
