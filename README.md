@@ -1,6 +1,8 @@
 # What is fundamental
 Fundamental is a c command line program, a rough diamond which barely works beautifully but is my most original program to date. I've recently found out that it uses a technique called [Symbolic Regression](https://en.wikipedia.org/wiki/Symbolic_regression). It is also being marketed as Dirac because it has the inhuman talent of Dirac the famous Relativistic Detached almost Autistic Strange Genius Feynmans hero to pull inhuman crazy equations out of the air which fit data better than curve fitting, it can curve fit a sin x yes it can!!!!!, primative traditional polynomial curve fitting can't, I'm a wanabee shaman & I think my program from the future gave him a hand in the cosmic consciousness..... thank you Jesus praise you Jesus for inspiring me to do something which might be significant .... prove me wrong!!!!!!!
 
+Firstly have a look at potential_physics_discoveries.txt for discoveries check the equations from a physics standpoint are dimensionally correct the ones inolving e mass of proton neutron and electron and the golden ratio and fine structure constant are especially interesting.
+
 NEW FEATURE
 Fundamental can now find the formula of a field entered as individual points in a csv file of NUM_REAL_DIMENSIONS
 e.g.
