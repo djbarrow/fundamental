@@ -30,8 +30,8 @@
 #ifdef PRINT_MULTIPLE_ANSWERS
 #error "PRINT_MULTIPLE_ANSWERS defined without MULTIPLE_RESULTS"
 #endif
-#ifdef NUM_ANSWERS
-#error "NUM_ANSWERS defined without MULTIPLE_RESULTS"
+#if defined(NUM_ANSWERS) && NUM_ANSWERS>1
+#error "NUM_ANSWERS>1 defined without MULTIPLE_RESULTS"
 #endif
 #endif
 #if !defined(HUNTER)&& !defined(HAVE_CONSTANTS_FILE)

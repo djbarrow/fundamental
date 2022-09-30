@@ -14,7 +14,7 @@
 #define HAVE_SUBTRACTION_OP
 #define HAVE_MULTIPLY_OP
 #define HAVE_DIVIDE_OP
-#define HAVE_POWER_OP
+//#define HAVE_POWER_OP
 //#define HAVE_MODULO_OP
 //#define HAVE_AND_OP
 //#define HAVE_OR_OP
@@ -42,20 +42,20 @@
 
 
 /* General operation characteristics */
-#define SEQUENCE_HUNTER
-#define NUM_SEQUENCE_DIMENSIONS (2)
+//#define SEQUENCE_HUNTER
+//#define NUM_SEQUENCE_DIMENSIONS (2)
 //#define REAL_HUNTER
 //#define HAVE_FUNCTIONS
 //#define NUM_HUNTER_DIMENSIONS (3)
 //#define NUM_INTEGER_BITS   (32)
-//#define HAVE_CONSTANTS_FILE
+#define HAVE_CONSTANTS_FILE
 #define HAVE_PRINT_SUM_INFIX
 #define HAVE_PRINT_SUM_RPN
 //#define SIGNED_OPERATION
 //#define MULTIPLE_RESULTS
 #define SEED (0)
 //#define PRINT_ONLY_FIRST_CORRECT_ANSWER
-//#define NUM_ANSWERS (1)
+#define NUM_ANSWERS (1)
 //#define ERROR_OP rint
 #define HAVE_PROGRESS
 //#define SPARSE_ARRAY_INDICES

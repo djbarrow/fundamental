@@ -1531,6 +1531,7 @@ static void signal_print_error_measurements(int signal)
 }
 #endif
 
+#ifdef SEQUENCE_HUNTER
 void init_sequence(int argc,char *argv[],int curropt)
 {
   int idx;
@@ -1559,7 +1560,7 @@ void init_sequence(int argc,char *argv[],int curropt)
 #endif
       );
 }
-
+#endif
 
 int main(int argc,char *argv[])
 {
