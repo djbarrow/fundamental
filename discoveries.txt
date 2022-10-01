@@ -1,0 +1,41 @@
+Found match error=4.714556e-05 fundamental constant name=mass_of_neutron value=1.674929e-27
+result=1.675008e-27
+mass_of_proton mass_of_electron mass_of_electron golden_ratio  *  +  + 
+1.672623e-27 9.109390e-31 9.109390e-31 1.618034e+00  *  +  + 
+(mass_of_proton + (mass_of_electron + (mass_of_electron * golden_ratio)))
+(1.672623e-27  + (9.109390e-31  + (9.109390e-31  * 1.618034e+00 )))
+
+Found match error=7.948149e-05 fundamental constant name=mass_of_neutron value=1.674929e-27
+result=1.675062e-27
+mass_of_proton mass_of_electron golden_ratio semitone_multiple  +  *  + 
+1.672623e-27 9.109390e-31 1.618034e+00 1.059463e+00  +  *  + 
+(mass_of_proton + (mass_of_electron * (golden_ratio + semitone_multiple)))
+(1.672623e-27  + (9.109390e-31  * (1.618034e+00  + 1.059463e+00 )))
+
+Found match error=4.818072e-05 fundamental constant name=semitone_multiple value=1.059463e+00
+result=1.059412e+00
+1 fine_structure_constant 5 pi  +  *  + 
+1 7.297350e-03 5 3.141593e+00  +  *  + 
+(1 + (fine_structure_constant * (5 + pi)))
+(1 + (7.297350e-03  * (5 + 3.141593e+00 )))
+
+Found match error=9.784477e-05 fundamental constant name=mass_of_proton value=1.672623e-27
+result=1.672459e-27
+mass_of_neutron mass_of_electron fine_structure_constant e  -  *  + 
+1.674929e-27 9.109390e-31 7.297350e-03 2.718282e+00  -  *  + 
+(mass_of_neutron + (mass_of_electron * (fine_structure_constant - e)))
+(1.674929e-27  + (9.109390e-31  * (7.297350e-03  - 2.718282e+00 )))
+
+Found match error=8.134724e-05 fundamental constant name=mass_of_proton value=1.672623e-27
+result=1.672759e-27
+mass_of_neutron mass_of_electron golden_ratio 4  -  *  + 
+1.674929e-27 9.109390e-31 1.618034e+00 4  -  *  + 
+(mass_of_neutron + (mass_of_electron * (golden_ratio - 4)))
+(1.674929e-27  + (9.109390e-31  * (1.618034e+00  - 4)))
+
+Found match error=4.310236e-05 fundamental constant name=semitone_multiple value=1.059463e+00
+result=1.059509e+00
+1 3 e fine_structure_constant  *  *  + 
+1 3 2.718282e+00 7.297350e-03  *  *  + 
+(1 + (3 * (e * fine_structure_constant)))
+(1 + (3 * (2.718282e+00  * 7.297350e-03 )))
