@@ -10,6 +10,7 @@ p charge_of_electron 1.60217733e+19
 p mass_of_electron 9.1093897e-31
 p mass_of_proton 1.6726231e-27
 p mass_of_neutron 1.674929e-27
+p mass_of_muon 1.883531627e-28
 p electronic_radius 2.81794092e-15
 p planck_constant 6.626076e-34
 p avodagro_constant 6.0221367e+23
