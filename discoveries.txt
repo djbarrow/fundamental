@@ -39,3 +39,24 @@ result=1.059509e+00
 1 3 2.718282e+00 7.297350e-03  *  *  + 
 (1 + (3 * (e * fine_structure_constant)))
 (1 + (3 * (2.718282e+00  * 7.297350e-03 )))
+
+Found match error=1.222877e-05 fundamental constant name=mass_of_neutron value=1.674929e-27
+result=1.674909e-27
+mass_of_proton mass_of_electron mass_of_muon fine_structure_constant  *  +  + 
+1.672623e-27 9.109390e-31 1.883532e-28 7.297350e-03  *  +  + 
+(mass_of_proton + (mass_of_electron + (mass_of_muon * fine_structure_constant)))
+(1.672623e-27  + (9.109390e-31  + (1.883532e-28  * 7.297350e-03 )))
+
+Found match error=4.892766e-05 fundamental constant name=mass_of_neutron value=1.674929e-27
+result=1.674847e-27
+mass_of_proton mass_of_muon golden_ratio fine_structure_constant  *  *  + 
+1.672623e-27 1.883532e-28 1.618034e+00 7.297350e-03  *  *  + 
+(mass_of_proton + (mass_of_muon * (golden_ratio * fine_structure_constant)))
+(1.672623e-27  + (1.883532e-28  * (1.618034e+00  * 7.297350e-03 )))
+
+Found match error=4.899031e-05 fundamental constant name=mass_of_proton value=1.672623e-27
+result=1.672705e-27
+mass_of_neutron mass_of_muon golden_ratio fine_structure_constant  *  *  - 
+1.674929e-27 1.883532e-28 1.618034e+00 7.297350e-03  *  *  - 
+(mass_of_neutron - (mass_of_muon * (golden_ratio * fine_structure_constant)))
+(1.674929e-27  - (1.883532e-28  * (1.618034e+00  * 7.297350e-03 )))
