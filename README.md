@@ -3,6 +3,71 @@ Fundamental is a c command line program, a rough diamond which barely works beau
 
 A YouTube video of the program running can be found here https://youtu.be/sD-pk9Pt4-Y
 
+The potential discoveries made by the program so far are as follows...
+Found match error=4.714556e-05 fundamental constant name=mass_of_neutron value=1.674929e-27
+result=1.675008e-27
+mass_of_proton mass_of_electron mass_of_electron golden_ratio  *  +  + 
+1.672623e-27 9.109390e-31 9.109390e-31 1.618034e+00  *  +  + 
+(mass_of_proton + (mass_of_electron + (mass_of_electron * golden_ratio)))
+(1.672623e-27  + (9.109390e-31  + (9.109390e-31  * 1.618034e+00 )))
+
+Found match error=7.948149e-05 fundamental constant name=mass_of_neutron value=1.674929e-27
+result=1.675062e-27
+mass_of_proton mass_of_electron golden_ratio semitone_multiple  +  *  + 
+1.672623e-27 9.109390e-31 1.618034e+00 1.059463e+00  +  *  + 
+(mass_of_proton + (mass_of_electron * (golden_ratio + semitone_multiple)))
+(1.672623e-27  + (9.109390e-31  * (1.618034e+00  + 1.059463e+00 )))
+
+Found match error=4.818072e-05 fundamental constant name=semitone_multiple value=1.059463e+00
+result=1.059412e+00
+1 fine_structure_constant 5 pi  +  *  + 
+1 7.297350e-03 5 3.141593e+00  +  *  + 
+(1 + (fine_structure_constant * (5 + pi)))
+(1 + (7.297350e-03  * (5 + 3.141593e+00 )))
+
+Found match error=9.784477e-05 fundamental constant name=mass_of_proton value=1.672623e-27
+result=1.672459e-27
+mass_of_neutron mass_of_electron fine_structure_constant e  -  *  + 
+1.674929e-27 9.109390e-31 7.297350e-03 2.718282e+00  -  *  + 
+(mass_of_neutron + (mass_of_electron * (fine_structure_constant - e)))
+(1.674929e-27  + (9.109390e-31  * (7.297350e-03  - 2.718282e+00 )))
+
+Found match error=8.134724e-05 fundamental constant name=mass_of_proton value=1.672623e-27
+result=1.672759e-27
+mass_of_neutron mass_of_electron golden_ratio 4  -  *  + 
+1.674929e-27 9.109390e-31 1.618034e+00 4  -  *  + 
+(mass_of_neutron + (mass_of_electron * (golden_ratio - 4)))
+(1.674929e-27  + (9.109390e-31  * (1.618034e+00  - 4)))
+
+Found match error=4.310236e-05 fundamental constant name=semitone_multiple value=1.059463e+00
+result=1.059509e+00
+1 3 e fine_structure_constant  *  *  + 
+1 3 2.718282e+00 7.297350e-03  *  *  + 
+(1 + (3 * (e * fine_structure_constant)))
+(1 + (3 * (2.718282e+00  * 7.297350e-03 )))
+
+Found match error=1.222877e-05 fundamental constant name=mass_of_neutron value=1.674929e-27
+result=1.674909e-27
+mass_of_proton mass_of_electron mass_of_muon fine_structure_constant  *  +  + 
+1.672623e-27 9.109390e-31 1.883532e-28 7.297350e-03  *  +  + 
+(mass_of_proton + (mass_of_electron + (mass_of_muon * fine_structure_constant)))
+(1.672623e-27  + (9.109390e-31  + (1.883532e-28  * 7.297350e-03 )))
+
+Found match error=4.892766e-05 fundamental constant name=mass_of_neutron value=1.674929e-27
+result=1.674847e-27
+mass_of_proton mass_of_muon golden_ratio fine_structure_constant  *  *  + 
+1.672623e-27 1.883532e-28 1.618034e+00 7.297350e-03  *  *  + 
+(mass_of_proton + (mass_of_muon * (golden_ratio * fine_structure_constant)))
+(1.672623e-27  + (1.883532e-28  * (1.618034e+00  * 7.297350e-03 )))
+
+Found match error=4.899031e-05 fundamental constant name=mass_of_proton value=1.672623e-27
+result=1.672705e-27
+mass_of_neutron mass_of_muon golden_ratio fine_structure_constant  *  *  - 
+1.674929e-27 1.883532e-28 1.618034e+00 7.297350e-03  *  *  - 
+(mass_of_neutron - (mass_of_muon * (golden_ratio * fine_structure_constant)))
+(1.674929e-27  - (1.883532e-28  * (1.618034e+00  * 7.297350e-03 )))
+
+
 Firstly have a look at potential_physics_discoveries.txt for discoveries check the equations from a physics standpoint are dimensionally correct the ones inolving e mass of proton neutron and electron and the golden ratio and fine structure constant are especially interesting.
 
 NEW FEATURE
@@ -30,15 +95,6 @@ It could have found the following formulas which started quantum physics had it 
 It could have found [Planck's Law](http://en.wikipedia.org/wiki/Planck%27s_law) if on a supercomputer or used SETI at home's computer network.  
 
 It could with some improvements in pattern matching have found Mendeleev's periodic table of elements or did some of Murray Gell Mann's work for which he got a Nobel Prize in 1969 for developing the Standard Model in Physics.
-
-To date I've had little luck in coming up with a fast formula for factorising large large numbers but God loves a tryer.
-# However it did find this gem which looks dimensionally correct relating the constants of physics to the golden ratio.
-
-Found match error=4.714556e-05 fundamental constant name=mass_of_neutron value=1.674929e-27
-
-(mass_of_proton + (mass_of_electron + (mass_of_electron * golden_ratio)))
-
-(1.672623e-27  + (9.109390e-31  + (9.109390e-31  * 1.618034e+00 )))
 
 In short it's for hacking the laws of nature & mathematics
 
