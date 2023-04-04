@@ -19,7 +19,7 @@ int sequence_func(number_t *retnum,dimension_t *array_indices)
    else
    {
       temp_indices[0]=array_indices[0]-1;
-      temp_indices[1]=array_indices[1]-2;
+      temp_indices[1]=arrayindices[1]-2;
       *retnum=*(get_array_member(temp_indices))+3;
    }
    return 0;
@@ -61,7 +61,7 @@ int sequence_func(number_t *retnum,dimension_t *array_indices)
    {
       if((array_indices[0]%idx2)==0)
       {
-	 *retnum=0;
+	 *retnum=idx2;
 	 return 0;
       }
    }
@@ -70,9 +70,13 @@ int sequence_func(number_t *retnum,dimension_t *array_indices)
 #endif
    int i;
    long long fact=1;
-   for(i=1;i<=array_indices[0];i++)
-      fact=fact*(i+1);
-   *retnum=fact;
+   *retnum=1;
+   for(i=2;i<array_indices[0];i++)
+     if(array_indices[0]%i==0)
+       {
+        *retnum=i;
+	break;
+       }
    return 0;
 }
 #endif
@@ -149,7 +153,7 @@ int sequence_func(number_t *retnum,dimension_t *array_indices)
   return 1;
 }
 #endif
-#if 1
+#if 0
 int sequence_func(number_t *retnum,dimension_t *array_indices)
 {
    *retnum=array_indices[0]+array_indices[1];
@@ -199,4 +203,9 @@ int sequence_func(result_t *retnum,dimension_t *array_indices)
    return 0;
 }
 #endif
+int sequence_func(result_t *retnum,dimension_t *array_indices)
+{
+  *retnum=exp(array_indices[0]);
+   return 0;
+}
 #endif /* SEQUENCE_HUNTER */

@@ -39,6 +39,7 @@ void debug_printf(char *format,...)
    {
       va_start(ap,format);
       vfprintf(stdout,format,ap);
+      vfprintf(stdout,"\n",ap);
       va_end(ap);
    }
 }

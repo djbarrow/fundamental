@@ -12,9 +12,9 @@ It licensed is under GPL v2.1
 #include "utils.h"
 #include "do_sum.h"
 #ifdef HAVE_GCD_OP
-number_t euclid_calc_gcd(number_t x,number_t y)
+uint_t euclid_calc_gcd(uint_t x,uint_t y)
 {
-   number_t temp;
+   uint_t temp;
 
    for(;;)
    {
@@ -22,7 +22,7 @@ number_t euclid_calc_gcd(number_t x,number_t y)
 	 return x;
       if(x<y)
       {
-	 temp=(y%x);
+	temp=((uint_t)y%(uint_t)x);
 	 if(temp==0)
 	    return(x);
 	 else
@@ -30,7 +30,7 @@ number_t euclid_calc_gcd(number_t x,number_t y)
       }
       else
       {
-	 temp=(x%y);
+	temp=((uint_t)x%(uint_t)y);
 	 if(temp==0)
 	    return(y);
 	 else
@@ -50,11 +50,11 @@ void init_factorials()
 
    for(pass=1;pass<=2;pass++)
    {
-      number_t factorial=1,oldfactorial=1;
+      uint_t factorial=1,oldfactorial=1;
       for(n=1;pass==1||n<=max_factorial;n++)
       {
-	 oldfactorial=factorial;
-	 factorial=factorial*n;
+	oldfactorial=factorial;
+	factorial=factorial*n;
 	 if(pass==2)
 	    factorials[n]=factorial;
 	 else if((factorial/n)!=oldfactorial)
@@ -63,7 +63,7 @@ void init_factorials()
       if(pass==1)
       {
 	 max_factorial=n-1;
-	 factorials=myalloc("factorials",sizeof(number_t)*max_factorial);
+	 factorials=myalloc("factorials",sizeof(uint_t)*max_factorial);
 	 factorials[0]=1;
       }
    }
@@ -143,7 +143,7 @@ int do_binary_sum(number_t *result_ptr,number_t *operand,stack_entry *curr)
       case modulo_op:
 	 if(operand[1]==0)
 	    abort_sum(-1,"modulo div by zero aborting sum "NUMBER_FORMAT
-		      "%"NUMBER_FORMAT,operand[0],operand[1]);
+		      "%%"NUMBER_FORMAT,operand[0],operand[1]);
 #ifdef NUM_INTEGER_BITS
 	 *result_ptr=operand[0]%operand[1];
 #else
@@ -160,65 +160,65 @@ int do_binary_sum(number_t *result_ptr,number_t *operand,stack_entry *curr)
 #endif
 #ifdef HAVE_AND_OP
       case and_op:
-	 *result_ptr=operand[0]&operand[1];
+	*result_ptr=(uint_t)operand[0]&(uint_t)operand[1];
 	 break;
 #endif
 #ifdef HAVE_OR_OP
       case or_op:
-	 *result_ptr=operand[0]|operand[1];
+	*result_ptr=(uint_t)operand[0]|(uint_t)operand[1];
 	 break;
 #endif
 #ifdef HAVE_XOR_OP
       case xor_op:
-	 *result_ptr=operand[0]^operand[1];
+	*result_ptr=(uint_t)operand[0]^(uint_t)operand[1];
 	 break;
 #endif
 #ifdef HAVE_LOG_SHIFT_OP
       case log_shift_op:
 #ifdef SIGNED_OPERATION
 	 if(IS_NEGATIVE(operand[1]))
-	    *result_ptr=((unsigned_number_t)operand[0])>>(MAKE_POSITIVE(operand[1]));
+	    *result_ptr=((uint_t)operand[0])>>(MAKE_POSITIVE(operand[1]));
 	 else
 #endif
-	    *result_ptr=((unsigned_number_t)operand[0])<<operand[1];
+	    *result_ptr=((uint_t)operand[0])<<operand[1];
 	 break;
 #endif
 #ifdef HAVE_LOG_RSHIFT_OP
       case log_rshift_op:
-	 *result_ptr=operand[0]>>operand[1];
+	*result_ptr=(uint_t)operand[0]>>(uint_t)operand[1];
 	 break;
 #endif
 #ifdef HAVE_LOG_LSHIFT_OP
       case log_lshift_op:
-	 *result_ptr=operand[0]<<operand[1];
+	*result_ptr=(uint_t)operand[0]<<(uint_t)operand[1];
 	 break;
 #endif
 #ifdef HAVE_ARITH_SHIFT
       case arith_shift:
 	 if(IS_NEGATIVE(operand[1]))
-	    *result_ptr=SIGN_EXTEND(operand[0])>>(MAKE_POSITIVE(operand[1]));
+	   *result_ptr=SIGN_EXTEND((uint_t)operand[0])>>(MAKE_POSITIVE((uint_t)operand[1]));
 	 else
-	    *result_ptr=operand[0]<<operand[1];
+	   *result_ptr=(uint_t)operand[0]<<(uint_t)operand[1];
 	 break;
 #endif
 #ifdef HAVE_ROTATE_OP
       case rotate:
       {
-	 number_t rotval;
+	 uint_t rotval;
 
 #ifdef SIGNED_OPERATION
 	 if(IS_NEGATIVE(operand[1]))
 	 {
-	    rotval=(MAKE_POSITIVE(operand[1]))&(NUM_INTEGER_BITS-1);
-	    *result_ptr=((((unsigned_number_t)operand[0])>>rotval)|
-		(((unsigned_number_t)operand[0])<<(NUM_INTEGER_BITS-rotval)));
+	   rotval=(MAKE_POSITIVE((uint_t)operand[1]))&(NUM_INTEGER_BITS-1);
+	    *result_ptr=((((uint__t)operand[0])>>rotval)|
+		(((uint_t)operand[0])<<(NUM_INTEGER_BITS-rotval)));
 	 }
 	 else
 #endif
 	 {
 	    rotval=operand[1]&(NUM_INTEGER_BITS-1);
-	    *result_ptr=((((unsigned_number_t)operand[0])<<rotval)|
-	       (((unsigned_number_t)operand[0])>>(NUM_INTEGER_BITS-rotval)));
+	    *result_ptr=((((uint_t)operand[0])<<rotval)|
+	       (((uint_t)operand[0])>>(NUM_INTEGER_BITS-rotval)));
 	 }
       }
       break;
@@ -229,8 +229,8 @@ int do_binary_sum(number_t *result_ptr,number_t *operand,stack_entry *curr)
 	  number_t rotval;
 
 	  rotval=operand[1]&(NUM_INTEGER_BITS-1);
-	  *result_ptr=((((unsigned_number_t)operand[0])<<rotval)|
-		       (((unsigned_number_t)operand[0])>>(NUM_INTEGER_BITS-rotval)));
+	  *result_ptr=((((uint_t)operand[0])<<rotval)|
+		       (((uint_t)operand[0])>>(NUM_INTEGER_BITS-rotval)));
       }
       break;
 #endif
@@ -240,8 +240,8 @@ int do_binary_sum(number_t *result_ptr,number_t *operand,stack_entry *curr)
 	 number_t rotval;
 
 	 rotval=operand[1]&(NUM_INTEGER_BITS-1);
-	 *result_ptr=((((unsigned_number_t)operand[0])>>rotval)|
-		      (((unsigned_number_t)operand[0])<<(NUM_INTEGER_BITS-rotval)));
+	 *result_ptr=((((uint_t)operand[0])>>rotval)|
+		      (((uint_t)operand[0])<<(NUM_INTEGER_BITS-rotval)));
       }
       break;
 #endif
@@ -252,8 +252,8 @@ int do_binary_sum(number_t *result_ptr,number_t *operand,stack_entry *curr)
 
 	 shiftval[0]=((operand[0])&NUM_INTEGER_BITS-1);
 	 shiftval[1]=((operand[1])&NUM_INTEGER_BITS-1);
-	 mask[0]=~(((unsigned_number_t)-1)<<shiftval[0]);
-	 mask[1]=~(((unsigned_number_t)-1)<<shiftval[1]);
+	 mask[0]=~(((uint_t)-1)<<shiftval[0]);
+	 mask[1]=~(((uint_t)-1)<<shiftval[1]);
 	 if(shiftval[0]<shiftval[1])
 	    *result_ptr=mask[0]&mask[1];
 	 else
@@ -276,7 +276,7 @@ int do_binary_sum(number_t *result_ptr,number_t *operand,stack_entry *curr)
 #endif
 #ifdef  HAVE_GCD_OP
       case gcd_op:
-	 if(SIGN_EXTEND(operand[0])<=0||SIGN_EXTEND(operand[1])<=0)
+	if(SIGN_EXTEND((uint_t)operand[0])<=0||SIGN_EXTEND((uint_t)operand[1])<=0)
 	    abort_sum(-1,"can't do gcd("NUMBER_FORMAT","NUMBER_FORMAT")",operand[0],operand[1]);
 	 *result_ptr=euclid_calc_gcd(operand[0],operand[1]);
 	 break;
@@ -332,7 +332,7 @@ int do_sum(number_t **result_stack_head_ptrptr,stack_entry *curr)
    int retval;
    *result_stack_head_ptrptr+=depth_change;
    operand=result_ptr=(*result_stack_head_ptrptr)-1;
-
+  
    switch(op)
    {
 #ifdef HAVE_FACTORIAL_OP

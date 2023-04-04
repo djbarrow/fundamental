@@ -146,7 +146,9 @@ void print_tabs(int num_tabs)
 #endif
 
 
-#if defined(MULTIPLE_RESULTS) || defined(HAVE_FUNCTIONS) || MAX_NUM_LOOPVARS
+#if defined(MULTIPLE_RESULTS) || defined(HAVE_FUNCTIONS) || defined(MAX_NUM_LOOPVARS)
+looptype_t *curr_looptype1;
+loopvar_t loopvar1;
 void print_sum_preamble(sum_t *sum)
 {
 #ifdef MULTIPLE_RESULTS
@@ -167,23 +169,28 @@ void print_sum_preamble(sum_t *sum)
 #else 
   printf("cum_result=0\n");
 #endif
+#endif
   {
     int idx;
-    looptype_t *curr_looptype;
     for(idx=0;idx<sum->num_loopvars;idx++)
       {
-	curr_looptype=&looptypes[sum->looptype_idx[idx]];
+	curr_looptype1=&looptypes[idx];
+	loopvar1=idx;
 	print_tabs(idx);
-	printf("for lv[%d]="LOOPVAR_FORMAT" to "LOOPVAR_FORMAT" lv[%d]%s\n",
-	       idx,curr_looptype->initial_val,curr_looptype->final_val,
-	       idx,curr_looptype->loopstr);     
+	printf("result[%d]=0;\n",idx);
+	print_tabs(idx);
+	printf("for(lv[%d] = "LOOPVAR_FORMAT" ; lv[%d] %s "LOOPVAR_FORMAT" ;",	
+	       loopvar1,curr_looptype1->initial_val,loopvar1,
+	       ((curr_looptype1->initial_val<curr_looptype1->final_val) ? "<="
+		: ">="),curr_looptype1->final_val);
+
+	       printf("lv[%d] %s = lv[%d])\n",
+	       loopvar1,&curr_looptype1->loopstr[0],loopvar1);
+	       
       }
   }
-#endif
 }
 #endif
-
-
 #ifdef HAVE_PRINT_SUM_INFIX
 struct infix_tree  **tree_members=NULL;
 #ifdef HAVE_CONSTANTS_FILE
@@ -191,10 +198,14 @@ int pass;
 #endif
 void recurse_sum_infix(depth_t rec_depth,sum_t *sum)
 {
-  stack_entry *curr=&sum->stack[rec_depth];
-  struct infix_tree *curr_tree_member=tree_members[rec_depth];
+  stack_entry *curr;
+  struct infix_tree *curr_tree_member;
   depth_t curr_child;
   operation op;
+  if(rec_depth>=sum->stack_depth||rec_depth<0)
+    return;
+  curr=&sum->stack[rec_depth];
+ curr_tree_member=tree_members[rec_depth];
 #ifdef SIGNED_OPERATION
   if(curr->minus)
     printf("-");
@@ -355,8 +366,10 @@ void print_sum_infix(sum_t *sum)
 	      curr_tree_member->child[--depth]=idx1;
 	    }
 	}
-      if(depth!=0)
+#if 0      
+      if(depth!=0&&debug)
 	exit_error("bug in  print_sum_infix\n");
+#endif
     }
 #ifdef HAVE_CONSTANTS_FILE
   for(pass=0;pass<(fundamental_list ? 2:1);pass++)
@@ -364,7 +377,7 @@ void print_sum_infix(sum_t *sum)
     {
 #if MAX_NUM_LOOPVARS
       print_tabs(sum->num_loopvars);
-      printf("result=");
+      printf("result[%d]+=",sum->num_loopvars-1);
 #endif
       recurse_sum_infix(sum->stack_depth-1,sum);
       printf("\n");
@@ -387,7 +400,7 @@ void print_sum_rpn(sum_t *sum)
     {
 #if MAX_NUM_LOOPVARS
       print_tabs(sum->num_loopvars);
-      printf("result=");
+      printf("result[%d]+=",sum->num_loopvars-1);
 #endif
       for(idx=0;idx<sum->stack_depth;idx++)
 	{
@@ -429,8 +442,9 @@ void print_sum_rpn(sum_t *sum)
 	      break;
 	    }
 	}
-      printf("\n");
+     
     }
+   printf("\n");
 }
 #endif
 
@@ -438,11 +452,18 @@ void print_sum_postamble(sum_t *sum)
 {
 #if MAX_NUM_LOOPVARS
   int idx;
-  for(idx=sum->num_loopvars-1;idx>=0;idx--)
-    {
-      print_tabs(idx+1);
-      printf("cum_result=cum_result %s result\n",operator_str[sum->loopvar_stack[idx].val]);
-    }
+    for(idx=sum->num_loopvars-1;idx>=0;idx--)
+      {
+	curr_looptype1=&looptypes[idx];
+	loopvar1=idx;
+	       
+	if((loopvar1+1)<sum->num_loopvars)
+	  {
+	    print_tabs(idx+1);
+	    printf("result[%d]%s=result[%d]",loopvar1,operator_str[sum->loop_operator_stack[idx+1].val],loopvar1+1);
+	  }
+      }
+    printf("cum_result %s= result[0]\n",operator_str[sum->loop_operator_stack[0].val]);
 #endif
   if(max_num_answers!=-1)
     {
@@ -454,7 +475,12 @@ void print_sum_postamble(sum_t *sum)
 
 void print_sum(sum_t *sum)
 {
-  PRINT_SUM(sum);
+#if 0
+  print_sum_preamble(sum);
+#endif
+  print_sum_rpn(sum);
+  print_sum_infix(sum);
+  print_sum_postamble(sum);
 }
 
 #ifdef HAVE_ERROR_MEASUREMENTS
@@ -551,11 +577,11 @@ void print_error_measurements()
 	      {
 		calculate_sum_result result=calculate_sum(&element->sum,debug_error_list_func);
 		if(result.aborted)
-		  {
-		    fprintf(stderr,"BUG DEBUG_ERROR_LIST sum is illegal");
-		    print_sum(&element->sum);
-		    exit(-1);
-		  }
+		{
+		   fprintf(stderr,"BUG DEBUG_ERROR_LIST sum is illegal");
+		   print_sum(&element->sum);
+		   exit(-1);
+		}
 	      }
 #endif
 	    }

@@ -54,7 +54,9 @@
 #if !defined(SIGNED_OPERATION) && defined(NUM_INTEGER_BITS) && defined(HAVE_ERROR_MEASUREMENTS)
 #warning "un SIGNED_OPERATION && HAVE_ERROR_MEASUREMENTS normally doesn't work owing to casting problems"
 #endif
-
+#if defined(HAVE_RESULT_LOOPVAR) && !defined (MAX_NUM_LOOPVARS)
+#error "HAVE_RESULT_LOOPVAR defined without MAX_NUM_LOOPVARS"
+#endif
 #if  defined(HAVE_ERROR_MEASUREMENTS) && defined(MAX_NUM_LOOPVARS)
 #error "These are not yet designed to work together see bottom of increment_sum_order."
 #endif

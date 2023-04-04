@@ -20,21 +20,21 @@ off_t getfilelen(int fd)
    return buf.st_size;
 }
 
-void parselines(char *buff,off_t len,char ***lines,int *numlines)
+void parselines(char *buff,off_t len,char ***lines,int *num_csv_lines)
 {
    off_t curr,lastline;
    int currline;
    buff[len]=0;
    
-   *numlines=0;
+   *num_csv_lines=0;
    for(curr=0;curr<len;curr++)
    {
       if(buff[curr]==0xa)
-	 (*numlines)++;
+	 (*num_csv_lines)++;
    }
    if(buff[len-1]!=0xa)
-      (*numlines)++;
-   if((*lines=(char **)malloc(((*numlines)+1)*sizeof(char*)))==NULL)
+      (*num_csv_lines)++;
+   if((*lines=(char **)malloc(((*num_csv_lines)+1)*sizeof(char*)))==NULL)
    {
       fprintf(stderr,"parselines: failed to allocate memory\n");
       exit(errno);
@@ -50,14 +50,15 @@ void parselines(char *buff,off_t len,char ***lines,int *numlines)
 	 lastline=curr+1;
       }
    }
-   (*lines)[(*numlines)-1]=&buff[lastline];
+   (*lines)[(*num_csv_lines)-1]=&buff[lastline];
    buff[len]=0;
-   (*lines)[*numlines]=&buff[len];
+   (*lines)[*num_csv_lines]=&buff[len];
 }
 
 void readreals(char *filename)
 {
-   int i,j,k,num_commas0,num_commas,readlen,currlen,numlines;
+   int num_csv_lines=0;
+   int i,j,k,num_commas0,num_commas,readlen,currlen;
    char **lines,*line,*endptr;
    int *strlens;
    off_t filelen;
@@ -82,9 +83,9 @@ void readreals(char *filename)
 	 break;
    }
    close(fd);
-   parselines(buff,filelen,&lines,&numlines);
+   parselines(buff,filelen,&lines,&num_csv_lines);
    num_commas0=0;
-   for(i=0;i<numlines;i++)
+   for(i=0;i<num_csv_lines;i++)
    {
       line=lines[i];
       num_commas=0;
@@ -113,12 +114,12 @@ void readreals(char *filename)
    }
    if(num_commas!=NUM_HUNTER_DIMENSIONS)
       exit_error("num_commas!=NUM_HUNTER_DIMENSIONS");
-   strlens=(int *)calloc(numlines,sizeof(int));
+   strlens=(int *)calloc(num_csv_lines,sizeof(int));
    if(strlens==NULL)
       exit_error("calloc strlens failed");
-   for(i=0;i<numlines;i++)
+   for(i=0;i<num_csv_lines;i++)
       strlens[i]=strlen(lines[i]);
-   for(i=0;i<numlines;i++)
+   for(i=0;i<num_csv_lines;i++)
    {
       line=lines[i];
       k=strlens[i];
@@ -128,10 +129,10 @@ void readreals(char *filename)
 	    line[j]=0;
       }
    }
-   coord_and_result_array=calloc((NUM_HUNTER_DIMENSIONS+1)*numlines,sizeof(number_t));
+   coord_and_result_array=calloc((NUM_HUNTER_DIMENSIONS+1)*num_csv_lines,sizeof(number_t));
    if(coord_and_result_array==NULL)
      exit_error("failed to allocate coord_and_result_array");
-   for(i=0;i<numlines;i++)
+   for(i=0;i<num_csv_lines;i++)
    {
       line=lines[i];
       for(j=0;j<=NUM_HUNTER_DIMENSIONS;j++)
@@ -146,7 +147,7 @@ void readreals(char *filename)
 	 line=endptr+1;
       }
    }
-   num_real_coord_idx=numlines-1;
+   num_real_coord_idx=num_csv_lines-1;
    free(buff);
    free(lines);
 }

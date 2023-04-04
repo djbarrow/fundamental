@@ -20,7 +20,7 @@ It is licensed under GPL v2.1
 #include <sys/time.h>
 struct timeval *starttime;
 #endif
-
+#include "defs.h"
 #ifdef REAL_HUNTER
 #include "csv.h"
 number_t *coord_and_result_array=NULL;
@@ -77,7 +77,7 @@ int num_answers=0,max_num_answers=-1;
 depth_t op_depth[num_operators]=
 {
 #ifdef HAVE_UNARY_OPERATORS
-   [first_unary_op ... last_unary_op]=1,
+  [first_unary_op ... last_unary_op]=1,
 #endif
 #ifdef HAVE_BINARY_OPERATORS
    [first_binary_op ... last_binary_op]=2,
@@ -95,9 +95,6 @@ operation first_operator[max_operator_depth]=
    first_binary_op
 #endif
 };
-
-
-
 
 
 #ifdef HAVE_ERROR_MEASUREMENTS
@@ -173,18 +170,21 @@ int add_sum_to_list(int idx)
    return 0;
 }
 #else
-#define MAX_STACK_DEPTH max_stack_depth
-#define SKIP_DEPTH    0
+#define MAX_STACK_DEPTH (max_stack_depth)
+#define SKIP_DEPTH (0)
 #endif
 
-number_t *result_stack;
 
-#if MAX_NUM_LOOPVARS
-int curr_num_loopvars1;
-loopvar_t loopvar[MAX_NUM_LOOPVARS];
+
+#ifdef MAX_NUM_LOOPVARS
+#define RESULT_STACK_END (1+sum->num_loopvars)
+#else
+#define RESULT_STACK_END (0)
+#endif
+#ifdef MAX_NUM_LOOPVARS
 stack_tag last_number;
 
-#define RESULT_STACK_START (1)
+
 
 void inc_loopfunc(loopvar_t *loopvar_ptr)
 {
@@ -209,14 +209,13 @@ void rshift_loopfunc(loopvar_t *loopvar_ptr)
 
 
 
-
 looptype_t looptypes[NUM_LOOPTYPES+1]=
 {
 #ifdef HAVE_INC_LOOPFUNC
-   {0,MAX_LOOPVAL,inc_loopfunc,"++"},
+   {MIN_LOOPVAL,MAX_LOOPVAL,inc_loopfunc,"++"},
 #endif
 #ifdef HAVE_DEC_LOOPFUNC
-   {MAX_LOOPVAL,0,dec_loopfunc,"--"},
+   {MAX_LOOPVAL,MIN_LOOPVAL,dec_loopfunc,"--"},
 #endif
 #ifdef HAVE_LSHIFT_NBITS_LOOPFUNC
    {1,(1<<(MAX_LOOPVAL_NUM_INTEGER_BITS-1)),lshift_loopfunc,"=<<1"},
@@ -240,64 +239,68 @@ looptype_t looptypes[NUM_LOOPTYPES+1]=
    {0,-1,NULL,""}
  };
 
-void init_looptype_indices()
+int *curr_looptype_idx=NULL;
+void init_sum_looptype()
 {
-   memset(sum->looptype_idx,0,sizeof(*sum->looptype_idx)*sum->num_loopvars);
+  int idx;
+  for(idx=0;idx<sum->num_loopvars;idx++)
+    sum->looptype[idx]=&looptypes[0];
 }
 
-int increment_looptype_indices()
+int increment_sum_looptype()
 {
-   int idx;
-   int *curr_looptype_idx=&sum->looptype_idx[0],*prev_looptype_idx=NULL;
+  int idx=0;
+  int retval=FALSE;
 
-   for(idx=0;idx<sum->num_loopvars;idx++)
-   {
-      if(*curr_looptype_idx<(NUM_LOOPTYPES-1))
-      {
-	 (*curr_looptype_idx)++;
-	 break;
-      }
+  for(idx=0;idx<sum->num_loopvars;idx++)
+    {
+      sum->looptype[idx]=sum->looptype[idx]+1;
+      if(sum->looptype[idx]==&looptypes[NUM_LOOPTYPES])
+	{
+	  sum->looptype[idx]=&looptypes[0];
+	}
+      if(idx>=sum->num_loopvars)
+	return TRUE;
       else
-      {
-	 /* eliminate duplicate looptypes */
-	 *curr_looptype_idx=(prev_looptype_idx ? *prev_looptype_idx:0 );
-      }
-      prev_looptype_idx=curr_looptype_idx++;
-   }
-   return (idx>=sum->num_loopvars);
+	return FALSE;
+    }
 }
 
 void init_loopvars()
 {
    int idx;
-
    for(idx=0;idx<sum->num_loopvars;idx++)
-      loopvar[idx]=looptypes[sum->looptype_idx[idx]].initial_val;
+     sum->loopvar[idx]=sum->looptype[idx]->initial_val;
+  
+   
 } 
 
 
 int increment_loopvars()
 {
    int idx;
+   number_t *curr;
    loopvar_t *curr_loopvar;
    looptype_t *curr_looptype;
-   int retval;
+   
+   idx=0;
+   curr_loopvar=&sum->loopvar[idx];
+   curr_looptype=sum->looptype[idx];
+   curr_looptype->loopfunc(curr_loopvar);
+   if(*curr_loopvar==curr_looptype->final_val)
+     {
+       *curr_loopvar==curr_looptype->initial_val;
+       idx++;
+     }
+   
+   return(idx>=sum->num_loopvars ? TRUE:FALSE);
+}
 
-   for(idx=0;idx<sum->num_loopvars;idx++)
-   {
-      curr_loopvar=&loopvar[idx];
-      curr_looptype=&looptypes[sum->looptype_idx[idx]];
-      if(*curr_loopvar==curr_looptype->final_val)
-	 *curr_loopvar=curr_looptype->initial_val;
-      else
-      {
-	 if((retval=do_binary_sum(&result_stack[0],&result_stack[0],&sum->loopvar_stack[idx])))
-	    retval=-1;
-	 curr_looptype->loopfunc(curr_loopvar);
-	 break;
-      }
-   }
-   return((idx>=sum->num_loopvars) ? 1:0);
+void init_loopvar_result_stack()
+{
+  int idx;
+   for(idx=1;idx<sum->num_loopvars;idx++)
+     sum->result_stack[idx]=0;
 }
 
 void init_loopvar_operators()
@@ -307,7 +310,7 @@ void init_loopvar_operators()
 
    for(idx=0;idx<sum->num_loopvars;idx++)
    {
-      curr=&sum->loopvar_stack[idx];
+      curr=&sum->loop_operator_stack[idx];
 #ifdef SIGNED_OPERATION
       curr->minus=FALSE;
 #endif
@@ -323,7 +326,7 @@ int increment_loopvar_operators()
 
    for(idx=0;idx<sum->num_loopvars;idx++)
    {
-      curr=&sum->loopvar_stack[idx];
+      curr=&sum->loop_operator_stack[idx];
       curr->val++;
       if(curr->val>last_binary_op)
 	 curr->val=first_binary_op;
@@ -377,8 +380,10 @@ int increment_result_loopvar()
    else
       sum->result_loopvar=-1LL;
 #else
+#if SIGNED_OPERATION
    if(sum->result_loopvar!=0)
       sum->result_loopvar=-sum->result_loopvar;
+#endif
    if(sum->result_loopvar>=0)
    {
       
@@ -396,9 +401,7 @@ int increment_result_loopvar()
    return retval;
 }
 #endif /* HAVE_RESULT_LOOPVAR */
-#else
-#define RESULT_STACK_START (0)
-#endif /* MAX_NUM_LOOPVARS */
+#endif
 
 
 #ifdef HAVE_PROGRESS
@@ -472,7 +475,16 @@ depth_t get_op_depth(stack_entry *curr)
 	 return NUM_SEQUENCE_DIMENSIONS;
 #endif
       default:
-	 exit_error("illegal tag in get_depth curr=%p tag="DEPTH_CHANGE_FORMAT"\n",curr,curr_tag);
+	if((long)curr>=(long)&sum&&(long)curr<(long)&sum->stack[max_stack_depth])
+	   fprintf(stderr,"illegal tag in get_depth curr=%p tag="DEPTH_CHANGE_FORMAT"\n",curr,curr_tag);
+	return ((long)&sum->stack[sum->stack_depth]-(long)curr)/(long)sizeof(&sum->stack[0]);
+#if 0
+	else
+	 {
+	     exit(-1);
+	     return 0;
+	 }
+#endif
 	 
    }
 }
@@ -529,7 +541,7 @@ void init_real_coord_idx()
 }
 #else
 #ifdef SEQUENCE_HUNTER
-result_t *get_array_member(dimension_t *array_indices)
+result_t *get_array_member(dimension_t *array_indices,dimension_t *idxptr)
 {
 #if MULTI_DIMENSIONAL
    dimension_t curr_dimension,curr_index;
@@ -545,6 +557,8 @@ result_t *get_array_member(dimension_t *array_indices)
 		    sequence_dimension[curr_dimension]);
       member_idx+=(sequence_dimension_multiplier[curr_dimension]*curr_index);
    }
+   if(idxptr)
+       *idxptr=member_idx;
    return(&sequence_array[member_idx]);
 #else
    if(array_indices[0]>=sequence_dimension[0]||array_indices[0]<0)
@@ -552,6 +566,8 @@ result_t *get_array_member(dimension_t *array_indices)
 		    " attempted to access "
 		    DIMENSION_FORMAT" max="DIMENSION_FORMAT"\n",array_indices[0],
 		    sequence_dimension[0]);
+   if(idxptr)
+     *idxptr=array_indices[0];
    return(&sequence_array[array_indices[0]]);
 #endif
 }
@@ -563,14 +579,14 @@ int increment_array_indices(dimension_t seed_idx
 #endif
 )
 {
-   int retval;
+ #ifdef MULTI_DIMENSIONAL
+      dimension_t curr_dimension=0;
+#endif 
 #ifdef SPARSE_ARRAY_INDICES
    do
    {
 #endif
 #ifdef MULTI_DIMENSIONAL
-      dimension_t curr_dimension;
-
       for(curr_dimension=0;curr_dimension<NUM_SEQUENCE_DIMENSIONS;curr_dimension++)
       {
 	 array_indices[curr_dimension]++;
@@ -579,21 +595,22 @@ int increment_array_indices(dimension_t seed_idx
 	 else
 	    break;
       }
-      retval=(curr_dimension>=NUM_SEQUENCE_DIMENSIONS);
 #else
       array_indices[0]++;
       if(array_indices[0]>=sequence_dimension[0])
       {
 	 array_indices[0]=seed_idx;
-	 retval=1;
+	 return TRUE;
       }
       else
-	 retval=0;
+	 return FALSE;
 #endif
 #ifdef SPARSE_ARRAY_INDICES
-   } while(skip_null&&!retval&&!*get_array_member(array_indices));
+   } while(skip_null&&!*get_array_member(array_indices));
 #endif
-   return retval;
+#ifdef MULTI_DIMENSIONAL
+   return curr_dimension>=NUM_SEQUENCE_DIMENSIONS;
+#endif
 }
 
 
@@ -657,7 +674,7 @@ number_range_t number_range[last_number_tag+1]=
    {0,-1,0},
 #endif
 
-   {1,0,0},
+   {0,0,0},
 };
 
 stack_tag first_number;
@@ -678,12 +695,12 @@ int increment_numbers()
 #ifdef HAVE_ERROR_MEASUREMENTS
    int have_number=FALSE;
 #endif
-#if MAX_NUM_LOOPVARS
+#ifdef MAX_NUM_LOOPVARS
    do
    {
 #endif
       done=FALSE;
-      for(idx=SKIP_DEPTH;idx<sum->stack_depth;idx++)
+      for(idx=0;idx<sum->stack_depth;idx++)
       {
 	 curr=&sum->stack[idx];
 	 if(is_number(curr->tag))
@@ -767,7 +784,7 @@ int increment_sum_order()
    depth_t depth_change,depth;
    stack_entry *curr;
   retry:;
-   for(idx=curr_depth1;idx>=SKIP_DEPTH;idx--)
+   for(idx=curr_depth1;idx>=0;idx--)
    {
       curr=&sum->stack[idx];
       switch(curr->tag)
@@ -846,7 +863,7 @@ int increment_sum_order()
 	 goto retry;
       if(sum->num_loopvars>0)
       {
-	 int loopvar_val=curr_num_loopvars1;	   
+	 int loopvar_val=sum->num_loopvars-1;	   
 	 /* change the loopvars to the lowest valid order */
 	 for(idx=SKIP_DEPTH;idx<sum->stack_depth;idx++)
 	 {
@@ -885,6 +902,7 @@ int init_stack_list()
 int increment_operators(depth_t depth)
 {
    depth_t idx;
+   int done=FALSE;
    stack_entry *curr;
    operation last_operation=(depth<max_operator_depth ?
 			     first_operator[depth] : num_operators);
@@ -953,7 +971,11 @@ int result_correct(result_t testvals)
 #endif
       ;
 #endif /*  HAVE_ERROR_MEASUREMENTS */
-
+#ifdef MAX_NUM_LOOPVARS
+   retval=do_binary_sum(&sum->result_stack[0],&sum->result_stack[1],&sum->loop_operator_stack[0]);
+   if(retval!=0)
+     return FALSE;
+#endif     
 #ifdef MULTIPLE_RESULTS
 #ifndef PRINT_ONLY_FIRST_CORRECT_ANSWER
    int retval1=0;
@@ -1049,7 +1071,7 @@ int result_correct(result_t testvals)
 #endif
 	 );
 #else   /* ERROR_OP */
-      if(result_stack[0]==0)
+      if(sum->result_stack[0]==0)
 	error1=
 #ifdef MULTIPLE_RESULTS
 	  (*answers++);
@@ -1063,7 +1085,7 @@ int result_correct(result_t testvals)
 #else
 		  testvals
 #endif
-		  /result_stack[0])-1.0;
+		  /sum->result_stack[0])-1.0;
 	 if(error1<0.0)
 	    error1=-error1;
 #if 0
@@ -1122,7 +1144,7 @@ int increment_functions()
 }
 #endif
 #endif
-#else
+#endif
 #ifdef HAVE_CONSTANTS_FILE
 int check_sum()
 {
@@ -1160,8 +1182,6 @@ int check_sum()
    return(-1);
 }
 #endif
-#endif
-
 
 
 int compare_stack_entries(const void *c1, const void *c2)
@@ -1195,10 +1215,10 @@ int sum_switch(stack_entry *curr)
       case loopvar_tag:
 #ifdef SIGNED_OPERATION
 	 if(curr->minus)
-	    *curr_result_ptr++=-loopvar[curr->val];
+	    *curr_result_ptr++=-sum->loopvar[curr->val];
 	 else
 #endif
-	    *curr_result_ptr++=loopvar[curr->val];
+	    *curr_result_ptr++=sum->loopvar[curr->val];
 	 break;
 #endif
 #ifdef HUNTER
@@ -1211,9 +1231,9 @@ int sum_switch(stack_entry *curr)
 	 }
 	 *function_result_ptr=(
 #ifdef SIGNED_OPERATION
-	    curr->minus ? -*get_array_member(temp_dimensions) :
+			       curr->minus ? -*get_array_member(temp_dimensions,NULL) :
 #endif
-	    *get_array_member(temp_dimensions));
+			       *get_array_member(temp_dimensions,NULL));
 	 curr_result_ptr-=(NUM_SEQUENCE_DIMENSIONS-1);
 	 break;
 #endif
@@ -1269,46 +1289,74 @@ int sum_switch(stack_entry *curr)
 #endif
    return FALSE;
 }
-
+#if 1
+dimension_t num_sequence_depth=0;
+#endif
 void sum_correct_func(calculate_sum_result *retval)
 {
-      if(!retval->aborted)
-      {
-
+#ifdef SEQUENCE_HUNTER
+  dimension_t idx;
+#endif
+  if(!retval->aborted)
 #ifdef HUNTER
-	 if(!result_correct(
+     if(!result_correct(
 #ifdef REAL_HUNTER
 	       get_real_member(real_coord_idx)
 #endif
 #ifdef SEQUENCE_HUNTER
-	       *get_array_member(array_indices)
+	       *get_array_member(array_indices,&idx)
 #endif
-	       ))
-	    retval->sum_correct=FALSE;
-	 
-#else
+					   ))
+       retval->sum_correct=FALSE;
+  if(retval->sum_correct)
+    {
+        retval->num_sequence_correct_depth=
+#ifdef REAL_HUNTER
+	  result_coord_depth>=num_real_coord_idx;_
+#endif
+#ifdef SEQUENCE_HUNTER
+	  idx
+#endif
+  +1;
+    }
+#ifdef SEQUENCE_HUNTER
+  if(retval->num_sequence_correct_depth==sequence_array_size)
+    retval->sum_correct=TRUE;
+#endif
+#ifdef REAL_HUNTER
+  if(real_coord_depth+1>num_real_coord_idx)
+     retval->sum_correct=TRUE;
+#endif  
+#if 1
+     int old_sequence_depth=num_sequence_depth;   
+     num_sequence_depth=MAX(num_sequence_depth,idx+1);
+     if(old_sequence_depth<num_sequence_depth)
+       printf("num_sequence_depth=%d\n",num_sequence_depth);
+#endif
+#endif
+#ifdef HAVE_CONSTANTS_FILE
 	 if(check_sum()==-1)
 	    retval->sum_correct=FALSE;
-	 else
-	 {
-	    printf("result="NUMBER_FORMAT"\n",result_stack[0]);
-	 }
 #endif
-      }
 }
-
+//int loop1=0;
 calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func)
 {
 
-   int idx;
-   
-   calculate_sum_result retval;
-   retval.sum_correct=TRUE;
+  int idx;
 #ifdef HUNTER
-#ifdef SEQUENCE_HUNTER
+  int good;
+#endif
+  calculate_sum_result retval;
+  retval.sum_correct=TRUE;
+#if !defined(NUM_INTEGER_BITS) && !defined(ERROR_OP)
+   retval.sum_correct_error_tolerance=NAN;
+   retval.num_sequence_correct_depth=0;
+#endif
 #ifdef MULTIPLE_RESULTS
    memset(retvals,0,MAX_NUM_RESULTS*sizeof(*retvals));
 #endif
+#ifdef SEQUENCE_HUNTER
    init_array_indices(
 #ifdef HAVE_FUNCTIONS 
       sum->seed
@@ -1322,89 +1370,142 @@ calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func)
 #endif
 #ifdef REAL_HUNTER
    init_real_coord_idx();
-#endif
-   do
-   {
-#endif /* HUNTER */
-#if MAX_NUM_LOOPVARS
-      int inc_lv_retval;
-#ifdef HAVE_RESULT_LOOPVAR
-      result_stack[0]=sum->result_loopvar;
-#else
-      result_stack[0]=0;
 #endif   
+#if MAX_NUM_LOOPVARS
+#ifdef HAVE_RESULT_LOOPVAR
       init_loopvars();
+      sum->result_stack[0]=sum->result_loopvar;
+#else
+      sum->result_stack[0]=0;
+#endif
+#if MAX_NUM_LOOPVARS
+			//init_looptype_indices();
+      init_loopvar_operators();
+      do
+	{
+#ifdef MAX_NUM_LOOPVARS
+	  void init_stack_looptype();		     
+#endif
+#endif /* MAX_NUM_LOOPVARS */
+#ifdef MAX_NUM_LOOPVARS
+      init_sum_looptype();
       do
       {
-#endif /* MAX_NUM_LOOPVARS */
-	 
-	 curr_result_ptr=&result_stack[RESULT_STACK_START];
-	 for(idx=0;idx<sum->stack_depth;idx++)
-	 {
-	    retval.aborted=sum_switch(&sum->stack[idx]);
+#endif
+      do
+      {
+#endif
+#ifdef REAL_HUNTER
+      do
+      {
+#endif
+#ifdef SEQUENCE_HUNTER 
+      do
+      {
+#endif
+	for(idx=1;idx<RESULT_STACK_END;idx++) 
+
+	  sum->result_stack[idx]=0;
+	for(idx=0;idx<sum->stack_depth;idx++) 
+	{
+	  curr_result_ptr=&sum->result_stack[RESULT_STACK_END];
+	  retval.aborted=sum_switch(&sum->stack[idx]);
+	    
 	    if(retval.aborted)
-	       goto skip;
+	      goto skip;
 	 }
-	 if(curr_result_ptr!=&result_stack[1+RESULT_STACK_START])
+	//	printf("loop1=%d\n",loop1++);
+	
+	if((curr_result_ptr<&sum->result_stack[RESULT_STACK_END])&&(curr_result_ptr>&sum->result_stack[RESULT_STACK_END+(max_stack_depth)
+#if MAX_NUM_LOOPVARS
+						+1 
+#endif
+												       ]))
+	  
 	 {
-	    fprintf(stderr,"Sum below is illegal curr_result_ptr(%p)"
-		    "!=&result_stack[1+RESULT_STACK_START](%p)\n",
-		    curr_result_ptr,&result_stack[1+RESULT_STACK_START]);
+	   fprintf(stderr,"Sum below is illegal curr_result_ptr(%p)"
+		    "!=&result_stack[RESULT_STACK_END](%p)\n",
+		    curr_result_ptr,&sum->result_stack[RESULT_STACK_END]);
 	    print_sum(sum);
 	    exit(-1); 
 	 }
-#if MAX_NUM_LOOPVARS
-	 inc_lv_retval=increment_loopvars();
-	 if(inc_lv_retval==-1)
-	    retval.aborted=TRUE;
-      } while(!inc_lv_retval);
-#endif
-     skip:;
+
+
+
       sum_func(&retval);
+      skip:
 #ifdef HUNTER
-   } while(!retval.aborted&&(retval.sum_correct
+   good=(!retval.aborted&&(retval.sum_correct
 #ifdef HAVE_ERROR_MEASUREMENTS
 		      ||error_sums_good()
 #endif
-	      )
-	   
-	   &&
+			    ) ? 1:0);
+   if(good)
+     {
+#if !defined(NUM_INTEGER_BITS) && !defined(ERROR_OP)
+       retval.sum_correct_error_tolerance=
+	 (retval.sum_correct_error_tolerance==NAN ? error1 :
+	  (retval.sum_correct_error_tolerance>error1 ? retval.sum_correct_error_tolerance: error1));
+#endif
+     }
+#endif // HUNTER   
 #ifdef SEQUENCE_HUNTER
-	   !increment_array_indices(
+      }
+      while(!increment_array_indices(
 #ifdef HAVE_FUNCTIONS
-	      sum->seed
+				  sum->seed
 #else
-	      MIN_SEED
+				  MIN_SEED
 #endif
 #ifdef SPARSE_ARRAY_INDICES
-	      ,TRUE
+				  ,TRUE
 #endif
+				      )
+		   );
 #endif /* SEQUENCE_HUNTER */
 #ifdef REAL_HUNTER
-	      !increment_real_coord_idx(
+      }
+      while(!increment_real_coord_idx());
 #endif
-	      ));
-#endif /* HUNTER */
-   return retval;
+#if MAX_NUM_LOOPVARS
+      }
+      while(!(increment_sum_looptype));
+      }
+      while(!increment_loopvars());
+#endif
+#if MAX_NUM_LOOPVARS
+
+			   } while(!increment_loopvar_operators());
+#endif   
+ return retval;
 }
 
 
 
 void process_fundamentals()
 {
-
+  int prev_num_sequence_correct_depth=0;
 #if MAX_NUM_LOOPVARS 
    for(sum->num_loopvars=MIN_NUM_LOOPVARS;sum->num_loopvars<=MAX_NUM_LOOPVARS;sum->num_loopvars++)
    {
-      curr_num_loopvars1=sum->num_loopvars-1;
-      number_range[loopvar_tag].hi_val=curr_num_loopvars1;
+      number_range[loopvar_tag].lo_val=0;
+      number_range[loopvar_tag].hi_val=(sum->num_loopvars-1>0 ? sum->num_loopvars-1:0);
       number_range[last_number].next_tag=(sum->num_loopvars ?  loopvar_tag : number_range[loopvar_tag].next_tag);
+#endif
+      int cnt=
+#ifdef HAVE_UNARY_OPERATORS
+	2;
+#else
+#ifdef HAVE_BINARY_OPERATORS
+      3;
+#endif
 #endif
       for(sum->stack_depth=
 #if MAX_NUM_LOOPVARS
-	     MAX(sum->num_loopvars,1+SKIP_DEPTH)
+	    MAX(cnt,
+		MAX(sum->num_loopvars,(1+SKIP_DEPTH)))
 #else
-	     1+SKIP_DEPTH
+	    (1+SKIP_DEPTH)
 #endif
 	     ;sum->stack_depth<=MAX_STACK_DEPTH;
 
@@ -1425,7 +1526,7 @@ void process_fundamentals()
 #endif
 	 {
 	    if(init_stack_list())
-	       goto skip_depth;
+	       goto skip_depth_label;
 	    do
 	    {
 #if defined(HAVE_FUNCTIONS) && defined(SIGNED_OPERATION)
@@ -1441,21 +1542,15 @@ void process_fundamentals()
 			/* This I believe works for floating point values as well */
 			memset(&error_val,0,sizeof(error_t)*NUM_ERROR_MEASUREMENTS);
 #endif
-#if MAX_NUM_LOOPVARS			
-			init_looptype_indices();
-			do
-			{
-			   init_loopvar_operators();
-			   do
-			   {
-
-#ifdef HAVE_RESULT_LOOPVAR
-			      init_result_loopvar();
-			      do
-			      {
+#ifdef HAVE_RESULT_LOOPVAR			     
+	  init_result_loopvar();
+	  do
+	    {
 #endif
-#endif /* MAX_NUM_LOOPVARS */
+
 				 calculate_sum_result result=calculate_sum(sum,sum_correct_func);
+				 if(sum->stack_depth==3)
+				   print_sum(sum);
 				 if(!result.aborted)
 				 {
 #ifdef HAVE_ERROR_MEASUREMENTS
@@ -1463,24 +1558,27 @@ void process_fundamentals()
 				    for(idx=0;idx<NUM_ERROR_MEASUREMENTS;idx++)
 				       add_sum_to_list(idx);
 #endif
-				    if(result.sum_correct)
-				       print_sum(sum);
 				 }
-#if MAX_NUM_LOOPVARS
+#ifdef HUNTER
+				 if(result.sum_correct&&result.num_sequence_correct_depth>prev_num_sequence_correct_depth&&!result.aborted)
+				 {
+				  
+				     print_sum(sum);
+				     printf("sequence_correct_depth %d fully_correct %s\n",result.num_sequence_correct_depth,((result.sum_correct&&!result.aborted) ? "yes" : "no"));
+				     prev_num_sequence_correct_depth=result.num_sequence_correct_depth;
+				 }
+#endif
 #ifdef HAVE_RESULT_LOOPVAR
-			      } while(!increment_result_loopvar());
+		     } while(!increment_result_loopvar());
 #endif
-			   } while(!increment_loopvar_operators());
-			}while(!increment_looptype_indices());
-#endif
-		     } while(!increment_numbers());
+		  } while(!increment_numbers());
 		  } while(!loop_operators());
 #if defined(HAVE_FUNCTIONS) && defined(SIGNED_OPERATION)
 	       } while(!increment_functions());
 #endif
 	    }while(!increment_sum_order());
 	 }
-	skip_depth:;
+	skip_depth_label:;
       }
 #if MAX_NUM_LOOPVARS
    }
@@ -1616,7 +1714,7 @@ int main(int argc,char *argv[])
       {
 	 case 'h':
 	    hi_int=atoi(optarg);
-	    if(hi_int<=0)
+	    if(hi_int<0)
 	       goto error;
 	    break;
 #ifdef HAVE_CONSTANTS_FILE
@@ -1694,12 +1792,11 @@ int main(int argc,char *argv[])
 #ifdef HAVE_PRINT_SUM_INFIX
 	    tree_members=(struct infix_tree **)myalloc("tree_members",sizeof(struct infix_tree *)*max_stack_depth);
 #endif
-  	    result_stack=(number_t *)myalloc("result_stack",sizeof(number_t)*
-					     ((max_stack_depth>>1)
+  	    sum->result_stack=(number_t *)myalloc("result_stack",sizeof(number_t)*((RESULT_STACK_END)+(max_stack_depth)
 #if MAX_NUM_LOOPVARS
 						+1 
 #endif
-					       ));
+									      ));
 	    break;
 #ifdef REAL_HUNTER
 	 case 'f':
@@ -1763,7 +1860,7 @@ int main(int argc,char *argv[])
 	       {
 		  if(!sequence_func(&result,array_indices))
 		  {
-		     *get_array_member(array_indices)=result;
+		    *get_array_member(array_indices,NULL)=result;
 #if defined(MULTIPLE_RESULTS) && !defined(NUM_ANSWERS)
 #ifdef SPARSE_ARRAY_INDICES
 		     if(!result)
@@ -1780,12 +1877,12 @@ int main(int argc,char *argv[])
 	       }
 #ifndef MULTIPLE_RESULTS
 	       else if(c=='i')
-		  *get_array_member(array_indices)=ASCII_TO_NUM(argv[curropt++]);
+		 *get_array_member(array_indices,NULL)=ASCII_TO_NUM(argv[curropt++]);
 	       else if(c=='f')
 	       {
 		 numassigned=fscanf(fstream,"%39s\n",(char *)&numbuff);
 		  if(numassigned==1)
-		     *get_array_member(array_indices)=ASCII_TO_NUM(numbuff);
+		    *get_array_member(array_indices,NULL)=ASCII_TO_NUM(numbuff);
 		  else
 		     exit_error("syntax error in file %s or %s\n",optarg,line);
 		  line++;

@@ -8,7 +8,7 @@ Copyright (C) 2018  D.J. Barrow dj_barrow@ariasoft.ie barrow_dj@yahoo.com
 It is licensed under GPL v2.1
 */
 #ifdef HAVE_GCD_OP
-number_t euclid_calc_gcd(number_t x,number_t y);
+uint_t euclid_calc_gcd(uint_t x,uint_t y);
 #endif
 #ifdef HAVE_FACTORIAL_OP
 void init_factorials();

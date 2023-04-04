@@ -177,15 +177,17 @@ defined(HAVE_LT_RATIOED_ERROR)
 #if NUM_INTEGER_BITS>32
 #ifdef SIGNED_OPERATION
 typedef long long number_t;
+typedef long long uint_t;
 #define NUMBER_FORMAT "%lld"
 #else
 typedef unsigned long long number_t;
+typedef unsigned long long uint_t;
 #define NUMBER_FORMAT "%llu"
 #endif
 /* atoll will break for unsigned numbers > signed long long */
 #define ASCII_TO_NUM atoll
 typedef unsigned long long unsigned_number_t;
-
+typedef unsigned long long uint_t;
 
 #if NUM_INTEGER_BITS!=64
 #define RESULT_MASK (((1ULL<<NUM_INTEGER_BITS)-1))
@@ -197,10 +199,12 @@ typedef unsigned long long unsigned_number_t;
 #else /* NUM_INTEGER_BITS>32 */
 #ifdef SIGNED_OPERATION
 typedef long number_t;
+typedef unsigned long uint_t;
 #define NUMBER_FORMAT "%ld"
 #define ASCII_TO_NUM atol
 #else
 typedef unsigned long number_t;
+typedef unsigned long uint_t;
 #define NUMBER_FORMAT "%lu"
 #define ASCII_TO_NUM (number_t)atoll
 #endif
@@ -235,6 +239,8 @@ typedef long long int_t;
 typedef unsigned long long uint_t;
 #define MAX_INT_T  ((int_t)(~0ULL>>1))
 #define MIN_INT_T  (int_t)((uint_t)(~0ULL>>1)+1)
+#endif
+#ifndef NUM_INTEGER_BITS
 typedef double number_t;
 #define NUMBER_FORMAT "%e"
 #define ASCII_TO_NUM atof
@@ -271,10 +277,14 @@ extern result_t alloc_result(int num_answers);
 #endif /* NUM_ANSWERS */
 #endif
 
-#ifdef HUNTER
+#ifdef REAL_HUNTER
 #define MULTI_DIMENSIONAL (!defined(NUM_HUNTER_DIMENSIONS) || NUM_HUNTER_DIMENSIONS>1)
 #ifndef NUM_HUMTER_DIMENSIONS
 extern int NUM_HUMTER_DIMENSIONS;
+#else
+#ifdef SEQUENCE_HUNTER
+#define MULTI_DIMENSIONAL (!defined(NUM_SEQUENCE_DIMENSIONS) || NUM_SEQUENCE_DIMENSIONS>1)
+#endif
 #endif
 #endif
 
@@ -288,7 +298,7 @@ extern dimension_t curr_seed;
 #define MAX_DIMENSION ((dimension_t)-1)
 #define DIMENSION_FORMAT "%lu"
 extern int sequence_func(result_t *retnums,dimension_t *array_indices);
-extern result_t *get_array_member(dimension_t *array_indices);
+extern result_t *get_array_member(dimension_t *array_indices,dimension_t *idxptr);
 #endif
 #ifdef REAL_HUNTER
 #define DIMENSION_FORMAT "%lu"
@@ -518,16 +528,9 @@ void init_simplifyable(void);
 typedef long stackval_t;
 #define STACKVAL_FORMAT "%ld"
 
-typedef struct
-{
-       stack_tag tag;
-#ifdef SIGNED_OPERATION
-       int minus;
-#endif
-      stackval_t val;
-} stack_entry;
 
-depth_t get_op_depth(stack_entry *curr);
+
+
 
 #define abort_sum(err,format...) \
 { \
@@ -547,7 +550,7 @@ dimension_t MAX_NUM_RESULTS;
 #if MAX_NUM_LOOPVARS
 typedef unsigned long loopvar_t;
 #define LOOPVAR_FORMAT "%lu"
-extern loopvar_t loopvar[MAX_NUM_LOOPVARS];
+
 typedef struct
 {
       loopvar_t initial_val;
@@ -637,33 +640,52 @@ enum
 };
 #endif
 
+typedef struct
+{
+       stack_tag tag;
+#ifdef SIGNED_OPERATION
+       int minus;
+#endif
+      stackval_t val;
+} stack_entry;
 
+depth_t get_op_depth(stack_entry *curr);
+#ifdef HAVE_RESULT_LOOPVAR
+#define result_loopvar loopvar[0]
+#endif
 typedef struct 
 {
       int     stack_depth;
 #ifdef HAVE_FUNCTIONS
       dimension_t seed;
 #endif
-#ifdef HAVE_RESULT_LOOPVAR
-      number_t result_loopvar;
-#endif
-#if MAX_NUM_LOOPVARS
+#ifdef MAX_NUM_LOOPVARS
       int num_loopvars;
-      int looptype_idx[MAX_NUM_LOOPVARS];
-      stack_entry loopvar_stack[MAX_NUM_LOOPVARS];
+      stack_entry loop_operator_stack[MAX_NUM_LOOPVARS
+#ifndef HAVE_HAVE_RESULT_LOOPVAR
+				      -1
+#endif    
+				      ];
+      loopvar_t loopvar[MAX_NUM_LOOPVARS
+#ifdef HAVE_RESULT_LOOPVAR
+			+1
+#endif			
+			];
+      looptype_t *looptype[MAX_NUM_LOOPVARS];
 #endif
+      number_t *result_stack;
       stack_entry stack[];
 } sum_t;
 
 
 #if defined(MULTIPLE_RESULTS) || defined(HAVE_FUNCTIONS) || MAX_NUM_LOOPVARS
 extern void print_sum_preamble(sum_t *sum);
-#define PRINT_SUM_PREAMBLE(sum) print_sum_preamble(sum)
+#define PRINT_SUM_PREAMBLE(sum) print_sum_preamble(sum);
 #else
 #define PRINT_SUM_PREAMBLE(sum)
 #endif
 
-#define PRINT_SUM_POSTAMBLE(sum) print_sum_postamble(sum)
+#define PRINT_SUM_POSTAMBLE(sum) print_sum_postamble(sum);
 #ifdef HAVE_PRINT_SUM_INFIX
 extern void print_sum_infix(sum_t *sum);
 #endif
@@ -673,30 +695,19 @@ extern void print_sum_rpn(sum_t *sum);
 extern void print_sum(sum_t *sum);
 
 #if defined(HAVE_PRINT_SUM_INFIX) && defined(HAVE_PRINT_SUM_RPN)
-#define PRINT_SUM(sum)       \
-{                            \
-   PRINT_SUM_PREAMBLE(sum);  \
-   print_sum_rpn(sum);       \
-   print_sum_infix(sum);     \
-   PRINT_SUM_POSTAMBLE(sum); \
-}
-#else
-#ifdef HAVE_PRINT_SUM_RPN
-#define PRINT_SUM(sum)      \
-{                           \
-   PRINT_SUM_PREAMBLE(sum); \
-   print_sum_rpn(sum);      \
-   PRINT_SUM_POSTAMBLE(sum);\
-}
+#define PRINT_SUM(sum1) {print_sum_preamble(sum1) print_sum_rpn(sum1);print_sum_infix(sum1);print_sum_postamble(sum1)}
 #endif
-#ifdef HAVE_PRINT_SUM_INFIX
-#define PRINT_SUM(sum)      \
-{                           \
-   PRINT_SUM_PREAMBLE(sum)  \
-   print_sum_infix(sum);    \
-   PRINT_SUM_POSTAMBLE(sum) \
-}
+#if defined(HAVE_PRINT_SUM_RPN) && !defined(HAVE_PRINT_SUM_INFIX)
+#define PRINT_SUM(sum1)\
+   PRINT_SUM_PREAMBLE(sum1)\
+   print_sum_rpn(sum1);\
+   PRINT_SUM_POSTAMBLE(sum1)
 #endif
+#if defined(HAVE_PRINT_SUM_INFIX) && !defined(HAVE_PRINT_SUM_RPN) 
+#define PRINT_SUM(sum1)\
+   PRINT_SUM_PREAMBLE(sum1)\
+   print_sum_infix(sum1);\
+   PRINT_SUM_POSTAMBLE(sum1)
 #endif /* defined(HAVE_PRINT_SUM_INFIX) && defined(HAVE_PRINT_SUM_RPN) */
 #ifdef HAVE_ERROR_MEASUREMENTS
 extern void print_error_measurements(void);
@@ -720,8 +731,14 @@ extern struct list_head error_list[NUM_ERROR_MEASUREMENTS];
 #endif
 typedef struct
 {
-      int sum_correct:1;
-      int aborted:1;
+#ifdef HUNTER
+      int num_sequence_correct_depth;
+#endif
+#if !defined(NUM_INTEGER_BITS) && !defined(ERROR_OP)
+      number_t sum_correct_error_tolerance;
+#endif
+      int sum_correct;
+      int aborted;
 } calculate_sum_result;
 
 typedef void (*calculate_sum_func_t)(calculate_sum_result *retval);
@@ -741,5 +758,6 @@ extern number_t NUM_HUNTER_DIMENSIONS;
 #ifdef SEQUENCE_HUNTER
 #ifndef NUM_SEQUENCE_DIMENSIONS
 extern dimension_t NUM_SEQUENCE_DIMENSIONS;
+#endif 
 #endif
-#endif
+
