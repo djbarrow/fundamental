@@ -1,5 +1,5 @@
 #CC=gcc33
-CC=gcc-6
+CC=gcc
 OBJFILES = \
 fundamental.o \
 do_sum.o \
