@@ -80,7 +80,7 @@ char *operator_str[num_operators+1]=
 #ifdef HAVE_LOG_LSHIFT_OP
     "log_lshift",
 #endif
-#ifdef HAVE_ARITH_SHIFT
+#ifdef HAVE_ARITH_SHIFT_OP
     "arith_shift",
 #endif
 #ifdef HAVE_ROTATE_OP
