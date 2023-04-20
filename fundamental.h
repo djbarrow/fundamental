@@ -680,6 +680,9 @@ typedef struct
 
 typedef void (*calculate_sum_func_t)(calculate_sum_result *retval);
 extern calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func);
+#ifndef NUM_INTEGER_BITS
+extern int number_to_int_t(number_t *numval,int_t *intval);
+#endif
 #ifdef SEQUENCE_HUNTER
 //extern dimension_t *array_indices;
 #endif
