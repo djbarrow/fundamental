@@ -496,10 +496,6 @@ typedef enum
    invalid_tag=-1,
    first_tag,
    dummy_tag=first_tag-1,
-#if MAX_NUM_LOOPVARS
-   /* The loopvar_tag has to be the first valid tag */
-   loopvar_tag,
-#endif
 #ifdef HUNTER
    dimension_tag,
 #endif
@@ -547,49 +543,7 @@ dimension_t *retvals;
 dimension_t MAX_NUM_RESULTS;
 #endif
 #endif
-#if MAX_NUM_LOOPVARS
-typedef unsigned long loopvar_t;
-#define LOOPVAR_FORMAT "%lu"
 
-typedef struct
-{
-      loopvar_t initial_val;
-      loopvar_t final_val;
-      void (*loopfunc)(loopvar_t *loopvar_ptr);
-      char loopstr[5];
-} looptype_t;
-
-enum
-{
-#ifdef HAVE_INC_LOOPFUNC
-   dummy_lv0,
-#endif
-#ifdef HAVE_DEC_LOOPFUNC
-   dummy_lv1,
-#endif
-#ifdef HAVE_LSHIFT_NBITS_LOOPFUNC
-   dummy_lv2,
-#endif
-#ifdef HAVE_RSHIFT_NBITS_LOOPFUNC
-   dummy_lv3,
-#endif
-#ifdef HAVE_INC_PWR_NBITS_LOOPFUNC
-   dummy_lv4,
-#endif
-#ifdef HAVE_DEC_PWR_NBITS_LOOPFUNC
-   dummy_lv5,
-#endif
-#if ZERO_MAX_LOOPVAL
-   dummy_lv6,
-#endif
-#if ONE_MAX_LOOPVAL
-   dummy_lv7,
-#endif
-   NUM_LOOPTYPES
-};
-
-extern looptype_t looptypes[NUM_LOOPTYPES+1];
-#endif
 
 extern int num_answers,max_num_answers;
 
@@ -650,35 +604,18 @@ typedef struct
 } stack_entry;
 
 depth_t get_op_depth(stack_entry *curr);
-#ifdef HAVE_RESULT_LOOPVAR
-#define result_loopvar loopvar[0]
-#endif
 typedef struct 
 {
       int     stack_depth;
 #ifdef HAVE_FUNCTIONS
       dimension_t seed;
 #endif
-#ifdef MAX_NUM_LOOPVARS
-      int num_loopvars;
-      stack_entry loop_operator_stack[MAX_NUM_LOOPVARS
-#ifndef HAVE_HAVE_RESULT_LOOPVAR
-				      -1
-#endif    
-				      ];
-      loopvar_t loopvar[MAX_NUM_LOOPVARS
-#ifdef HAVE_RESULT_LOOPVAR
-			+1
-#endif			
-			];
-      looptype_t *looptype[MAX_NUM_LOOPVARS];
-#endif
       number_t *result_stack;
       stack_entry stack[];
 } sum_t;
 
 
-#if defined(MULTIPLE_RESULTS) || defined(HAVE_FUNCTIONS) || MAX_NUM_LOOPVARS
+#if defined(MULTIPLE_RESULTS) || defined(HAVE_FUNCTIONS) 
 extern void print_sum_preamble(sum_t *sum);
 #define PRINT_SUM_PREAMBLE(sum) print_sum_preamble(sum);
 #else

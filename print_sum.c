@@ -135,20 +135,9 @@ char *operator_str[num_operators+1]=
   };
 
 
-#ifdef MAX_NUM_LOOPVARS
-void print_tabs(int num_tabs)
-{
-  int idx;
-
-  for(idx=0;idx<num_tabs;idx++)
-    printf("  ");
-}
-#endif
 
 
-#if defined(MULTIPLE_RESULTS) || defined(HAVE_FUNCTIONS) || defined(MAX_NUM_LOOPVARS)
-looptype_t *curr_looptype1;
-loopvar_t loopvar1;
+#if defined(MULTIPLE_RESULTS) || defined(HAVE_FUNCTIONS) 
 void print_sum_preamble(sum_t *sum)
 {
 #ifdef MULTIPLE_RESULTS
@@ -162,33 +151,7 @@ void print_sum_preamble(sum_t *sum)
     if(retvals[curr_result]==sequence_array_size)
       printf("result=%d ",curr_result);
 #endif
-  printf("\n");
-#if MAX_NUM_LOOPVARS
-#ifdef HAVE_RESULT_LOOPVAR
-  printf("cum_result="NUMBER_FORMAT"\n",sum->result_loopvar);
-#else 
-  printf("cum_result=0\n");
-#endif
-#endif
-  {
-    int idx;
-    for(idx=0;idx<sum->num_loopvars;idx++)
-      {
-	curr_looptype1=&looptypes[idx];
-	loopvar1=idx;
-	print_tabs(idx);
-	printf("result[%d]=0;\n",idx);
-	print_tabs(idx);
-	printf("for(lv[%d] = "LOOPVAR_FORMAT" ; lv[%d] %s "LOOPVAR_FORMAT" ;",	
-	       loopvar1,curr_looptype1->initial_val,loopvar1,
-	       ((curr_looptype1->initial_val<curr_looptype1->final_val) ? "<="
-		: ">="),curr_looptype1->final_val);
-
-	       printf("lv[%d] %s = lv[%d])\n",
-	       loopvar1,&curr_looptype1->loopstr[0],loopvar1);
-	       
-      }
-  }
+}
 }
 #endif
 #ifdef HAVE_PRINT_SUM_INFIX
@@ -205,7 +168,7 @@ void recurse_sum_infix(depth_t rec_depth,sum_t *sum)
   if(rec_depth>=sum->stack_depth||rec_depth<0)
     return;
   curr=&sum->stack[rec_depth];
- curr_tree_member=tree_members[rec_depth];
+  curr_tree_member=tree_members[rec_depth];
 #ifdef SIGNED_OPERATION
   if(curr->minus)
     printf("-");
@@ -231,11 +194,6 @@ void recurse_sum_infix(depth_t rec_depth,sum_t *sum)
       else
 	printf("%s",fundamental_list[curr->val]->name);
       break;
-#endif
-#if MAX_NUM_LOOPVARS
-    case loopvar_tag:
-      printf("lv["LOOPVAR_FORMAT"]",curr->val);
-      break; 
 #endif
     case integer_tag:
       printf(STACKVAL_FORMAT,curr->val);
@@ -375,10 +333,6 @@ void print_sum_infix(sum_t *sum)
   for(pass=0;pass<(fundamental_list ? 2:1);pass++)
 #endif
     {
-#if MAX_NUM_LOOPVARS
-      print_tabs(sum->num_loopvars);
-      printf("result[%d]+=",sum->num_loopvars-1);
-#endif
       recurse_sum_infix(sum->stack_depth-1,sum);
       printf("\n");
     }
@@ -398,10 +352,6 @@ void print_sum_rpn(sum_t *sum)
   for(pass=0;pass<(fundamental_list ? 2:1);pass++)
 #endif
     {
-#if MAX_NUM_LOOPVARS
-      print_tabs(sum->num_loopvars);
-      printf("result[%d]+=",sum->num_loopvars-1);
-#endif
       for(idx=0;idx<sum->stack_depth;idx++)
 	{
 	  curr=&sum->stack[idx];
@@ -429,11 +379,6 @@ void print_sum_rpn(sum_t *sum)
 		printf("%s ",fundamental_list[curr->val]->name);
 	      break;
 #endif
-#if MAX_NUM_LOOPVARS
-	    case loopvar_tag:
-	      printf("lv["LOOPVAR_FORMAT"] ",curr->val);
-	      break; 
-#endif
 	    case integer_tag:
 	      printf(STACKVAL_FORMAT" ",curr->val);
 	      break;
@@ -444,27 +389,12 @@ void print_sum_rpn(sum_t *sum)
 	}
      
     }
-   printf("\n");
+  printf("\n");
 }
 #endif
 
 void print_sum_postamble(sum_t *sum)
 {
-#if MAX_NUM_LOOPVARS
-  int idx;
-    for(idx=sum->num_loopvars-1;idx>=0;idx--)
-      {
-	curr_looptype1=&looptypes[idx];
-	loopvar1=idx;
-	       
-	if((loopvar1+1)<sum->num_loopvars)
-	  {
-	    print_tabs(idx+1);
-	    printf("result[%d]%s=result[%d]",loopvar1,operator_str[sum->loop_operator_stack[idx+1].val],loopvar1+1);
-	  }
-      }
-    printf("cum_result %s= result[0]\n",operator_str[sum->loop_operator_stack[0].val]);
-#endif
   if(max_num_answers!=-1)
     {
       num_answers++;
@@ -577,11 +507,11 @@ void print_error_measurements()
 	      {
 		calculate_sum_result result=calculate_sum(&element->sum,debug_error_list_func);
 		if(result.aborted)
-		{
-		   fprintf(stderr,"BUG DEBUG_ERROR_LIST sum is illegal");
-		   print_sum(&element->sum);
-		   exit(-1);
-		}
+		  {
+		    fprintf(stderr,"BUG DEBUG_ERROR_LIST sum is illegal");
+		    print_sum(&element->sum);
+		    exit(-1);
+		  }
 	      }
 #endif
 	    }
