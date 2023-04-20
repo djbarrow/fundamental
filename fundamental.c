@@ -721,7 +721,7 @@ int result_correct(result_t testvals)
 #endif /* MULTIPLE_RESULTS */
    {
 #ifdef HAVE_ERROR_MEASUREMENTS
-      error_pow1 = (error_t)result_stack[0] - (error_t)
+      error_pow1 = (error_t)sum->result_stack[0] - (error_t)
 #ifdef MULTIPLE_RESULTS
 	 *answers++
 #else
@@ -775,7 +775,7 @@ int result_correct(result_t testvals)
 #endif
 
 #ifdef NUM_INTEGER_BITS
-      retval = (result_stack[0]==
+      retval = (sum->result_stack[0]==
 #ifdef MULTIPLE_RESULTS
 		*answers++
 #else
@@ -786,7 +786,7 @@ int result_correct(result_t testvals)
       {
 
 #ifdef ERROR_OP
-	 retval = (ERROR_OP(result_stack[0])==
+	 retval = (ERROR_OP(sum->result_stack[0])==
 #ifdef MULTIPLE_RESULTS
 		   *answers++
 #else
@@ -876,7 +876,7 @@ int check_sum()
    stack_entry *curr;
    fundamental_constant *curr_const;
 
-   if(result_stack[0]!=0)
+   if(sum->result_stack[0]!=0)
    {
       for(idx1=0;idx1<num_constants;idx1++)
       {
