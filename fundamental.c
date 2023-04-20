@@ -1121,7 +1121,7 @@ calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func)
 #endif // HUNTER   
 #ifdef SEQUENCE_HUNTER
       }
-      while(!increment_array_indices(
+      while(good&&!increment_array_indices(
 #ifdef HAVE_FUNCTIONS
 	       sum->seed
 #else
@@ -1135,7 +1135,7 @@ calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func)
 #endif /* SEQUENCE_HUNTER */
 #ifdef REAL_HUNTER
    }
-   while(!increment_real_coord_idx());
+   while(good&&!increment_real_coord_idx());
 #endif
    return retval;
 }
