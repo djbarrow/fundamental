@@ -1,9 +1,17 @@
 # What is fundamental
 Fundamental is a c command line program, a rough diamond which barely works beautifully but is my most original program to date. I've recently found out that it uses a technique called [Symbolic Regression](https://en.wikipedia.org/wiki/Symbolic_regression). It is also being marketed as Dirac because it has the inhuman talent of Dirac the famous Relativistic Detached almost Autistic Strange Genius Feynmans hero to pull inhuman crazy equations out of the air which fit data better than curve fitting, it can curve fit a sin x yes it can!!!!!, primative traditional polynomial curve fitting can't, I'm a wanabee shaman & I think my program from the future gave him a hand in the cosmic consciousness..... thank you Jesus praise you Jesus for inspiring me to do something which might be significant .... prove me wrong!!!!!!!
 
+# Warning please check out stable code the head is unstable
+The last stable version of this code was checked in around 1 Jan 2023 don't check out the head. I broke all round me in a 48 hour coding session and was hallucinitating on paddys day 2023 owing to a 48 hour coding binge I went psychadellic when my head hit the pillow trying yet again to get my lookvar stuff working it's utter brittle rubbish I haven't figured out how to write this well so leave out anything to do with loopvars in funamental_config.h I have a lot more thinking to do.
+
+
 A YouTube video of the program running can be found here https://youtu.be/sD-pk9Pt4-Y
 
 The potential discoveries made by the program so far are as follows...
+However on thinking about it because the mass of neutron almost equals the mass of the proton  the mass of electron being very close
+to the dufference the fix of to get this more accutate to one in a thousand is about 1.6 times the mass of the electron this is an
+easy factor to come up with any number near 1.5 will do so these results I unfortunately for me think are an easy fluke.
+
 Found match error=4.714556e-05 fundamental constant name=mass_of_neutron value=1.674929e-27
 result=1.675008e-27
 mass_of_proton mass_of_electron mass_of_electron golden_ratio  *  +  + 
@@ -66,7 +74,6 @@ mass_of_neutron mass_of_muon golden_ratio fine_structure_constant  *  *  -
 1.674929e-27 1.883532e-28 1.618034e+00 7.297350e-03  *  *  - 
 (mass_of_neutron - (mass_of_muon * (golden_ratio * fine_structure_constant)))
 (1.674929e-27  - (1.883532e-28  * (1.618034e+00  * 7.297350e-03 )))
-
 
 Firstly have a look at potential_physics_discoveries.txt for discoveries check the equations from a physics standpoint are dimensionally correct the ones inolving e mass of proton neutron and electron and the golden ratio and fine structure constant are especially interesting.
 
