@@ -193,8 +193,8 @@ int do_binary_sum(number_t *result_ptr,number_t *operand,stack_entry *curr)
 	*result_ptr=(uint_t)operand[0]<<(uint_t)operand[1];
 	 break;
 #endif
-#ifdef HAVE_ARITH_SHIFT
-      case arith_shift:
+#ifdef HAVE_ARITH_SHIFT_OP
+      case arith_shift_op:
 	 if(IS_NEGATIVE(operand[1]))
 	   *result_ptr=SIGN_EXTEND((uint_t)operand[0])>>(MAKE_POSITIVE((uint_t)operand[1]));
 	 else
@@ -202,7 +202,7 @@ int do_binary_sum(number_t *result_ptr,number_t *operand,stack_entry *curr)
 	 break;
 #endif
 #ifdef HAVE_ROTATE_OP
-      case rotate:
+      case rotate_op:
       {
 	 uint_t rotval;
 
