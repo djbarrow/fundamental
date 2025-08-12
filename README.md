@@ -1,5 +1,5 @@
 # What is fundamental
-Please please look at feynman.ai code this is in python and slow, but it has dimensional analysis which I'm jealous of
+Please please look at feynman.ai code this is in python I thought it was slow but it uses pytorch gpu magic, but it has dimensional analysis which I'm jealous of
 but does more than my code for physics formula finding I wonder if the github feynman.ai does all it claims there isn't much
 code in the project and doing it in python rather than cython implys crapware, try merging the tidiest of my code with this. Also look at cern data files and jupiler note books and see if something in physics can be discovered. Nope my code doesn't have rpn to pytorch requiring a nvidia gpu most likely, feynman.ai is superior but it may have stolen the rpn idea from my code, I hope it did I got almost 3000
 readers of the joys of rpn in my sinscienceandspirituality.blogspot.com lets hope i was the origin of inspiring this code by the way symbolic regression was invented in 1975 which my code is a legacy of those who had similar ideas before me. My code was the best i could do i have to accept better now has been done.
