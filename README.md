@@ -1,6 +1,7 @@
 # What is fundamental
-Please please look at feynman.ai code this is in python and slow, but does more than my code for physics formula finding,
-try merging the tidiest of my code with this. Also look at cern data files and jupiler note books and see if something in physics can be discovered.
+Please please look at feynman.ai code this is in python and slow, but it has dimensional analysis which im jealous of
+but does more than my code for physics formula finding I wonder if the github feynman.ai does all it claims there isn't much
+code in the project and doing it in python rather than cython implys crapware, try merging the tidiest of my code with this. Also look at cern data files and jupiler note books and see if something in physics can be discovered.
 
 eureqa code is similar to my code slightly tidier as a commercial offering but feynman.ai is extremely interesting for physics. Tony Worm IBM github wrote a bloated java version of my code completely independently his pdf is better than mine and
 will provide additional education for you java code java is 10x slower than c, and i use the c preprocessor to make my code more than 20x faster i basically #ifdef out unwanted code. A princeton doctorate looked at my code and did something interesting in julia with more distributed computing support google github symbolic regression princeton.
