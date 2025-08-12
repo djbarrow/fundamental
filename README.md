@@ -9,10 +9,18 @@ I always believed rsa could be cracked on a zx spectrum Seeing as the did a diff
 
 To protect banks I advise the following scheme Multiple encryption - Wikipedia
 
+I made an attempt at genetic programming in the process_fundamental function,
+I am unsure of the quality of this code due to mental health problems.
 
 A YouTube video of the program running can be found here https://youtu.be/sD-pk9Pt4-Y
 
 The potential discoveries made by the program so far are as follows...
+I include 2 constants 2^1/12 the distance between semitones and the golden ratio.
+These constants are small and potentially can create the semi miraculous equations here without being
+miracolous at all I can only assume 1 in 10 any of these equations is significant.
+The reason i included semitones is string theory is 12 dimensional and so is western music an octave is 12 semitones.
+also people who have near death experiences say music is everywhere in heaven so i thought the quantity could
+be interesting see sidroth.org and iands.org for more info about peoples visits to heaven.
 However on thinking about it because the mass of neutron almost equals the mass of the proton  the mass of electron being very close
 to the dufference the fix of to get this more accutate to one in a thousand is about 1.6 times the mass of the electron this is an
 easy factor to come up with any number near 1.5 will do so these results I unfortunately for me think are an easy fluke.
