@@ -1,4 +1,11 @@
 # What is fundamental
+Please please look at feynman.ai code this is in python and slow, but does more than my code for physics formula finding,
+try merging the tidiest of my code with this. Also look at cern data files and jupiler note books and see if something in physics can be discovered.
+
+eureqa code is similar to my code slightly tidier as a commercial offering but feynman.ai is extremely interesting for physics. Tony Worm IBM github wrote a bloated java version of my code completely independently his pdf is better than mine and
+will provide additional education for you java code java is 10x slower than c, and i use the c preprocessor to make my code more than 20x faster i basically #ifdef out unwanted code. A princeton doctorate looked at my code and did something interesting in julia with more distributed computing support google github symbolic regression princeton.
+
+
 Fundamental is a c command line program, a rough diamond which barely works beautifully but is my most original program to date. I've recently found out that it uses a technique called [Symbolic Regression](https://en.wikipedia.org/wiki/Symbolic_regression). It is also being marketed as Dirac because it has the inhuman talent of Dirac the famous Relativistic Detached almost Autistic Strange Genius Feynmans hero to pull inhuman crazy equations out of the air which fit data better than curve fitting, it can curve fit a sin x yes it can!!!!!, primative traditional polynomial curve fitting can't.
 
 There was code checked in around march 17th 2023 which could find loops if your forking the code to fix bugs take this code too its buggy & doesn't work but its more advanced about 30% extra code. It also does successive apporoximation a type of genetic algorithm this code might have bugs too.
@@ -9,8 +16,10 @@ I always believed rsa could be cracked on a zx spectrum Seeing as the did a diff
 
 To protect banks I advise the following scheme Multiple encryption - Wikipedia
 
-I made an attempt at genetic programming in the process_fundamental function,
-I am unsure of the quality of this code due to mental health problems.
+I made an attempt at genetic programming/successive approximation in the process_fundamental related functions,
+I am unsure of the quality of this code due to mental health problems unfortunately im 56 now and code
+i wrote 20 years ago isn't easy to fix or understand and my mental health problems started 20 years ago
+I feel like Terry A Davis of templeos.org fame, I'm getting old I wish I wasn't, cest la vie.
 
 A YouTube video of the program running can be found here https://youtu.be/sD-pk9Pt4-Y
 
@@ -21,7 +30,7 @@ miracolous at all I can only assume 1 in 10 any of these equations is significan
 The reason i included semitones is string theory is 12 dimensional and so is western music an octave is 12 semitones.
 also people who have near death experiences say music is everywhere in heaven so i thought the quantity could
 be interesting see sidroth.org and iands.org for more info about peoples visits to heaven.
-However on thinking about it because the mass of neutron almost equals the mass of the proton  the mass of electron being very close
+However on thinking about it because the mass of neutron almost equals the mass of the proton  the mass of electron being very close einsteins theory of relativity kindof implys mass of neutron = mass of proton + electron
 to the dufference the fix of to get this more accutate to one in a thousand is about 1.6 times the mass of the electron this is an
 easy factor to come up with any number near 1.5 will do so these results I unfortunately for me think are an easy fluke.
 
