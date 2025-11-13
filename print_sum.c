@@ -494,13 +494,14 @@ void print_error_measurements()
 
   for(idx=0;idx<NUM_ERROR_MEASUREMENTS;idx++)
     {
-      struct list_head *curr_error_list=&error_list[idx];
+      struct list_head *curr_error_list=&error_list[idx],*element1;
       error_list_element *element;
       if(!list_empty(curr_error_list))
 	{
 	  printf("%s error list\n",error_measurment_str[idx]);
-	  list_for_each(((struct list_head *)element),curr_error_list)
+	  list_for_each(element1,curr_error_list)
 	    {
+	      element=(error_list_element *)element1;
 	      printf("error="ERROR_FORMAT"\n",element->error_val);
 	      print_sum(&element->sum);
 #ifdef HAVE_DEBUG_ERROR_LIST

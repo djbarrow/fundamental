@@ -59,3 +59,4 @@
 //#define ERROR_OP rint
 #define HAVE_PROGRESS
 //#define SPARSE_ARRAY_INDICES
+//#define HAVE_ABS_ERROR

@@ -116,12 +116,13 @@ int error_sums_good()
    for(idx=0;idx<NUM_ERROR_MEASUREMENTS;idx++)
       if((num_error_list_elements[idx]<max_error_list_size||error_val[idx]<((error_list_element *)error_list[idx].prev)->error_val))
 	 return 1;
+   return 0;
 }
 
 int add_sum_to_list(int idx)
 {
    error_list_element *element;
-   struct list_head *curr_error_list=&error_list[idx];
+   struct list_head *curr_error_list=&error_list[idx],*element1;
    error_t curr_error_val=error_val[idx];
    error_list_element *new_entry=NULL;
 
@@ -131,8 +132,9 @@ int add_sum_to_list(int idx)
    {
       if(num_error_list_elements[idx]>=max_error_list_size&&curr_error_val>((error_list_element *)curr_error_list->prev)->error_val)
 	 return 1;
-      list_for_each(((struct list_head *)element),curr_error_list)
+      list_for_each(element1,curr_error_list)
       {
+	element=(error_list_element *)element1;
 	 if(element->error_val>curr_error_val||((struct list_head *)element)->next==curr_error_list)
 	 {
 	    if(element->error_val<=curr_error_val)
@@ -1233,10 +1235,11 @@ void process_fundamentals_have_error_measurements()
 	
 	 for(idx=0;idx<NUM_ERROR_MEASUREMENTS;idx++)
 	 {
-	    struct list_head *curr_error_list=&error_list[idx];
+	    struct list_head *curr_error_list=&error_list[idx],*element1;
 	    error_list_element *element;
-	    list_for_each(((struct list_head *)element),curr_error_list)
+	    list_for_each(element1,curr_error_list)
 	    {
+	       element=(error_list_element *)element1;
 	       if(!element->processed)
 	       {
 		  element->processed=TRUE;

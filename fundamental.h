@@ -653,9 +653,7 @@ extern void print_error_measurements(void);
 
 
 #ifdef HAVE_ERROR_MEASUREMENTS
-#define __KERNEL__
-#include <linux/list.h>
-#undef __KERNEL
+#include "list.h"
 typedef struct
 {
       struct list_head list;
