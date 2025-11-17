@@ -226,5 +226,7 @@ readers of the joys of rpn in my sinscienceandspirituality.blogspot.com lets hop
 
 eureqa code is commercial and similar to my code slightly tidier as a commercial offering but feynman.ai is extremely interesting for physics. Tony Worm IBM github wrote a bloated java version of my code completely independently his pdf documenting his ideas is better than mine and will provide additional education for you java code java is 10x slower than c, and i use the c preprocessor to make my code more than 20x faster i basically #ifdef out unwanted code. A princeton doctorate looked at my code and did something interesting in julia with more distributed computing support google github symbolic regression princeton.
 
+The successive approximation/genetic algorithm HAVE_ERROR_MEASURMENTS is incomplete just leave it out of fundamental_config.h
+
 ## More about the Author
 I am a Christian, & I thank God for inspiring this code, my blog business card can be found here https://djbarrow.blogspot.com/2021/03/about-me_13.html and a Take on The Theory of everything can be found here https://sinscienceandspirituality.blogspot.com/2020/12/interesting-factoids-and-limitationsin.html
