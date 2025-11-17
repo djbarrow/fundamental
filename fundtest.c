@@ -8,6 +8,14 @@ It is licensed under GPL v2.1.
 #include "fundamental.h"
 #include <math.h>
 #ifdef SEQUENCE_HUNTER
+#if 1
+int sequence_func(number_t *retnum,dimension_t *array_indices)
+{
+
+  *retnum=(sin(array_indices[0])*5.0)/*+(sin(array_indices[0]*3)/5.0)*//*+(sin(array_indices[0]*5)*.1)*/;
+   return 0;
+}
+#endif
 #if 0
 int sequence_func(number_t *retnum,dimension_t *array_indices)
 {
@@ -203,9 +211,11 @@ int sequence_func(result_t *retnum,dimension_t *array_indices)
    return 0;
 }
 #endif
+#if 0
 int sequence_func(result_t *retnum,dimension_t *array_indices)
 {
   *retnum=exp(array_indices[0]);
    return 0;
 }
+#endif
 #endif /* SEQUENCE_HUNTER */
