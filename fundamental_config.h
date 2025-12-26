@@ -5,17 +5,17 @@
 //#define HAVE_FLOOR_OP
 //#define HAVE_CEIL_OP
 //#define HAVE_RINT_OP
-#define HAVE_SIN_OP
+//#define HAVE_SIN_OP
 //#define HAVE_COS_OP
 //#define HAVE_TAN_OP
 //#define HAVE_ONES_COMPLIMENT_OP
 //#define HAVE_NOT_OP
 #define HAVE_ADDITION_OP
-//#define HAVE_SUBTRACTION_OP
+#define HAVE_SUBTRACTION_OP
 #define HAVE_MULTIPLY_OP
 #define HAVE_DIVIDE_OP
-//#define HAVE_POWER_OP
-//#define HAVE_MODULO_OP
+#define HAVE_POWER_OP
+#define HAVE_MODULO_OP
 //#define HAVE_AND_OP
 //#define HAVE_OR_OP
 //#define HAVE_XOR_OP
@@ -29,7 +29,7 @@
 //#define HAVE_MASK_OP
 //#define HAVE_GETBIT_OP
 //#define HAVE_LN_OP
-//#define HAVE_GCD_OP
+#define HAVE_GCD_OP
 //#define HAVE_EQ_COND
 //#define HAVE_GT_COND
 //#define HAVE_GE_COND
@@ -57,6 +57,6 @@
 //#define PRINT_ONLY_FIRST_CORRECT_ANSWER
 #define NUM_ANSWERS (1)
 //#define ERROR_OP rint
-//#define HAVE_PROGRESS
+#define HAVE_PROGRESS
 //#define SPARSE_ARRAY_INDICES
 //#define HAVE_ABS_ERROR

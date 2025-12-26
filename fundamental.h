@@ -667,7 +667,7 @@ extern struct list_head error_list[NUM_ERROR_MEASUREMENTS];
 typedef struct
 {
 #ifdef HUNTER
-      int num_sequence_correct_depth;
+      int num_sequence_correct_count;
 #endif
 #if !defined(NUM_INTEGER_BITS) && !defined(ERROR_OP)
       number_t sum_correct_error_tolerance;

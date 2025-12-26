@@ -59,6 +59,9 @@ int hi_int,total,max_stack_depth,curr_depth1;
 #if !defined(NUM_INTEGER_BITS) && !defined(ERROR_OP)
 number_t error_tolerance=0.0001;
 #endif
+#ifdef SEQUENCE_HUNTER
+int max_allowed_sequence_errors=0,num_sequence_errors=0;
+#endif
 
 sum_t *sum;
 
@@ -100,7 +103,7 @@ operation first_operator[max_operator_depth]=
 #ifdef HAVE_ERROR_MEASUREMENTS
 error_t error_val[NUM_ERROR_MEASUREMENTS];
 /* max_error_list_size must be >=2 */
-int    max_error_list_size=100;
+int    max_error_list_size=3;
 int    num_error_list_elements[NUM_ERROR_MEASUREMENTS];         
 struct list_head error_list[NUM_ERROR_MEASUREMENTS];
 int    refinement_depth=8;
@@ -134,7 +137,7 @@ int add_sum_to_list(int idx)
 	 return 1;
       list_for_each(element1,curr_error_list)
       {
-	element=(error_list_element *)element1;
+	 element=(error_list_element *)element1;
 	 if(element->error_val>curr_error_val||((struct list_head *)element)->next==curr_error_list)
 	 {
 	    if(element->error_val<=curr_error_val)
@@ -797,13 +800,13 @@ int result_correct(result_t testvals)
 	    );
 #else   /* ERROR_OP */
 	 if(sum->result_stack[0]==0)
-	   error1=(
+	    error1=(
 #ifdef MULTIPLE_RESULTS
 	       (*answers++)
 #else
 	       testvals
 #endif
-		   );
+	       );
 	 else
 	    error1=(
 #ifdef MULTIPLE_RESULTS
@@ -1020,20 +1023,19 @@ void sum_correct_func(calculate_sum_result *retval)
 	    *get_array_member(array_indices,&idx)
 #endif
 	    ))
-	 retval->sum_correct=FALSE;
+	retval->sum_correct=FALSE;
    if(retval->sum_correct)
    {
-      retval->num_sequence_correct_depth=
+     retval->num_sequence_correct_count++;
 #ifdef REAL_HUNTER
-	 result_coord_depth>=num_real_coord_idx;_
+	 result_coord_depth>=num_real_coord_idx;
 #endif
-#ifdef SEQUENCE_HUNTER
-						   idx
-#endif
-						   +1;
    }
 #ifdef SEQUENCE_HUNTER
-   if(retval->num_sequence_correct_depth==sequence_array_size)
+   else {
+       num_sequence_errors++;
+   }
+   if(retval->num_sequence_correct_count+num_sequence_errors==sequence_array_size)
       retval->sum_correct=TRUE;
 #endif
 #ifdef REAL_HUNTER
@@ -1057,7 +1059,7 @@ calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func)
    retval.sum_correct=TRUE;
 #if !defined(NUM_INTEGER_BITS) && !defined(ERROR_OP)
    retval.sum_correct_error_tolerance=NAN;
-   retval.num_sequence_correct_depth=0;
+   retval.num_sequence_correct_count=0;
 #endif
 #ifdef MULTIPLE_RESULTS
    memset(retvals,0,MAX_NUM_RESULTS*sizeof(*retvals));
@@ -1081,14 +1083,15 @@ calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func)
    do
    {
 #endif
-#ifdef SEQUENCE_HUNTER 
+#ifdef SEQUENCE_HUNTER
+     num_sequence_errors=0;
       do
       {
 #endif
 	 curr_result_ptr=&sum->result_stack[0];
 	 for(idx=0;idx<sum->stack_depth;idx++) 
 	 {
-	   retval.aborted=sum_switch(&sum->stack[idx]);
+	    retval.aborted=sum_switch(&sum->stack[idx]);
 	    if(retval.aborted)
 	       goto skip;
 	 }
@@ -1123,7 +1126,7 @@ calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func)
 #endif // HUNTER   
 #ifdef SEQUENCE_HUNTER
       }
-      while(good&&!increment_array_indices(
+      while((good||num_sequence_errors<max_allowed_sequence_errors)&&!increment_array_indices(
 #ifdef HAVE_FUNCTIONS
 	       sum->seed
 #else
@@ -1146,7 +1149,7 @@ calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func)
 
 void process_fundamentals()
 {
-   int prev_num_sequence_correct_depth=0;
+   int prev_num_sequence_correct_count=0;
    int cnt=
 #ifdef HAVE_UNARY_OPERATORS
       2;
@@ -1203,12 +1206,12 @@ void process_fundamentals()
 #endif
 		     }
 #ifdef HUNTER
-		     if(result.sum_correct&&result.num_sequence_correct_depth>prev_num_sequence_correct_depth&&!result.aborted)
+		     if(result.sum_correct&&result.num_sequence_correct_count>prev_num_sequence_correct_count&&!result.aborted)
 		     {
 				  
 			print_sum(sum);
-			printf("sequence_correct_depth %d fully_correct %s\n",result.num_sequence_correct_depth,((result.sum_correct&&!result.aborted) ? "yes" : "no"));
-			prev_num_sequence_correct_depth=result.num_sequence_correct_depth;
+			printf("sequence_correct_count %d num_sequence_errors=%d\n",result.num_sequence_correct_count,num_sequence_errors);
+			prev_num_sequence_correct_count=result.num_sequence_correct_count;
 		     }
 #endif
 		  } while(!increment_numbers());
@@ -1335,11 +1338,12 @@ int main(int argc,char *argv[])
 	       "j:"
 #endif	       
 #ifdef SEQUENCE_HUNTER
-	       "f:i:s:l:"
+	       "f:i:s:l:n:"
 #endif
 #ifndef NUM_INTEGER_BITS
 	       "e:"
 #endif
+	       
 #ifdef HAVE_ERROR_MEASUREMENTS
 	       "r:"
 #endif
@@ -1432,6 +1436,11 @@ int main(int argc,char *argv[])
 #endif
   	    sum->result_stack=(number_t *)myalloc("result_stack",sizeof(number_t)*((max_stack_depth)));
 	    break;
+#ifdef SEQUENCE_HUNTER
+	 case 'n':
+	    max_allowed_sequence_errors=atoi(optarg);
+	    break;
+#endif
 #ifdef REAL_HUNTER
 	 case 'f':
 #ifndef NUM_HUNTER_DIMENSIONS
@@ -1628,6 +1637,7 @@ int main(int argc,char *argv[])
 	      "min_seed max_seed"
 #endif
 	      " dimensions > "
+	      " -n max_allowed_sequence_errors "
 #ifndef MULTIPLE_RESULTS
 	      "<-i "
 #ifndef NUM_SEQUENCE_DIMENSIONS
