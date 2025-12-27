@@ -8,7 +8,7 @@ It is licensed under GPL v2.1.
 #include "fundamental.h"
 #include <math.h>
 #ifdef SEQUENCE_HUNTER
-#if 1
+#if 0
 int sequence_func(number_t *retnum,dimension_t *array_indices)
 {
 
@@ -59,7 +59,7 @@ int sequence_func(number_t *retnum,dimension_t *array_indices)
 }
 #endif
 
-#if 0
+#if 1
 int sequence_func(number_t *retnum,dimension_t *array_indices)
 {
 #if 0
@@ -79,12 +79,14 @@ int sequence_func(number_t *retnum,dimension_t *array_indices)
    int i;
    long long fact=1;
    *retnum=1;
-   for(i=2;i<array_indices[0];i++)
-     if(array_indices[0]%i==0)
+   for(i=2;i<=(array_indices[0]+2);i++)
+     {
+       if((array_indices[0]+2)%i==0)
        {
         *retnum=i;
 	break;
        }
+     }
    return 0;
 }
 #endif
