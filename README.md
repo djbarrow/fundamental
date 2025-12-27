@@ -19,6 +19,14 @@ I feel like Terry A Davis of templeos.org fame, I'm getting old I wish I wasn't,
 
 A YouTube video of the program running can be found here https://youtu.be/sD-pk9Pt4-Y
 
+# SMP scalability workarounds
+It is quite difficult to scale fundamental to multiple cpus of gpus
+it runs beautifully on one processor and doesn't intefere with netflix on a smp machine as the code and data seem to stay in the l1 cache
+if you've about 4 cpus you can copy 4 fundamental copies from git into different local directories 
+while running one fundamental you can fundamental_config.h another fundamental
+with different defines and make & run with the same arguments .
+This will increase your searchspace for answers to the question your asking.
+
 The potential discoveries made by the program so far are as follows...
 I include 2 constants 2^1/12 the distance between semitones and the golden ratio.
 These constants are small and potentially can create the semi miraculous equations here without being
