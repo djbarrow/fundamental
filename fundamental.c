@@ -1034,6 +1034,11 @@ void sum_correct_func(calculate_sum_result *retval)
 #ifdef SEQUENCE_HUNTER
    else {
        num_sequence_errors++;
+       if(num_sequence_errors>max_allowed_sequence_errors)
+	 {
+	   retval->aborted=TRUE;
+	   return;
+	 }
    }
    if((retval->num_sequence_correct_count+num_sequence_errors>=idx)&&num_sequence_errors<=max_allowed_sequence_errors)
       retval->sum_correct=TRUE;
