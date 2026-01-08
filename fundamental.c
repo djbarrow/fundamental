@@ -1035,7 +1035,7 @@ void sum_correct_func(calculate_sum_result *retval)
    else {
        num_sequence_errors++;
    }
-   if(retval->num_sequence_correct_count+num_sequence_errors==sequence_array_size)
+   if((retval->num_sequence_correct_count+num_sequence_errors>=idx)&&num_sequence_errors<=max_allowed_sequence_errors)
       retval->sum_correct=TRUE;
 #endif
 #ifdef REAL_HUNTER
