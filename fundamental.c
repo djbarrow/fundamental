@@ -1064,6 +1064,8 @@ calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func)
    retval.sum_correct=TRUE;
 #if !defined(NUM_INTEGER_BITS) && !defined(ERROR_OP)
    retval.sum_correct_error_tolerance=NAN;
+#endif
+#ifdef HUNTER
    retval.num_sequence_correct_count=0;
 #endif
 #ifdef MULTIPLE_RESULTS
