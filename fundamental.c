@@ -185,35 +185,73 @@ void print_progress(int sig)
 {
    depth_t i;
    struct timeval currtime,resulttime;
-   long long depth_time[2],time_factor,est_time_remaining,summation,est_currdepth_time,time_at_currdepth;
+   unsigned long long depth_time[2];
+   unsigned long time_factor;
+   time_t est_time_remaining,summation,est_currdepth_time,time_at_currdepth;
 
   
 
-   est_time_remaining=est_currdepth_time=0;
-   gettimeofday(&currtime,NULL);
-   if(sum->stack_depth>1)
+    if(sum->stack_depth>
+#if min_operator_depth==max_operator_depth==2
+						       4
+#else
+						       3
+#endif
+      )
    {
+     gettimeofday(&currtime,NULL);
       timersub(&currtime,&starttime[sum->stack_depth],&resulttime);
       time_at_currdepth=resulttime.tv_sec;
-      timersub(&starttime[sum->stack_depth],&starttime[sum->stack_depth-1],&resulttime);
-      depth_time[0]=(resulttime.tv_sec*1000000)+resulttime.tv_usec;
-      timersub(&starttime[sum->stack_depth-1],&starttime[sum->stack_depth-2],&resulttime);
-      depth_time[1]=(resulttime.tv_sec*1000000)+resulttime.tv_usec;
+      timersub(&starttime[sum->stack_depth],&starttime[sum->stack_depth
+#if min_operator_depth==max_operator_depth==2
+						       -2
+#else
+						       -1
+#endif
+						       ],&resulttime);
+      depth_time[0]=(resulttime.tv_sec==0 ? 1:resulttime.tv_sec);
+      timersub(&starttime[sum->stack_depth
+#if min_operator_depth==max_operator_depth==2
+						       -2
+#else
+						       -1
+#endif
+
+
+			  ],&starttime[sum->stack_depth
+#if min_operator_depth==max_operator_depth==2
+						       -4
+#else
+						       -2
+#endif
+
+				       -2
+
+
+				       ],&resulttime);
+      depth_time[1]==(resulttime.tv_sec==0 ? 1:resulttime.tv_sec);
       time_factor=depth_time[0]/depth_time[1];
       est_currdepth_time=(depth_time[0]*time_factor)/1000000;
       summation=est_currdepth_time;
       est_currdepth_time-=time_at_currdepth;
-      for(i=sum->stack_depth;i<=max_stack_depth;i++)
+      est_time_remaining=est_currdepth_time;
+      for(i=sum->stack_depth;i<=max_stack_depth;
+#if min_operator_depth==max_operator_depth==2
+	  i+=2
+#else
+	  i++
+#endif
+	  )
       {
 	 est_time_remaining+=summation;
-	 summation=summation*time_factor;
+	 summation*=time_factor;
       }
-      est_time_remaining-=time_at_currdepth;
    }
    timersub(&currtime,&starttime[0],&resulttime);
    printf("curr depth="DEPTH_CHANGE_FORMAT" max_stack_depth="DEPTH_CHANGE_FORMAT
-	  " time running=%ld secs est_currdepth_time=%lld secs  est_time_remaining=%lld secs\n",
-	  sum->stack_depth,max_stack_depth,resulttime.tv_sec,est_currdepth_time,est_time_remaining);
+	  " time running=%lu secs ",
+	  sum->stack_depth,max_stack_depth,resulttime.tv_sec);
+   printf("est_currdepth_time=%d secs est_time_remaining=%d secs\n",(int)est_currdepth_time,(int)est_time_remaining);
 }
 #endif
 
@@ -520,7 +558,9 @@ void init_function(stack_entry *curr)
 }
 #endif
 
-
+#ifdef HAVE_LOOPVAR
+number_t loopvar;
+#endif
 void init_operation(stack_entry *curr,depth_t depth)
 {
 #ifdef SIGNED_OPERATION
@@ -559,8 +599,16 @@ int increment_sum_order()
 #ifdef HAVE_CONSTANTS_FILE
 	 case constant_tag:
 #endif
+#ifdef HAVE_LOOPVAR
+      case loopvar_tag:
+
+#endif
 	 case integer_tag:
 	    init_operation(curr,min_operator_depth);
+#ifdef HAVE_LOOPVAR
+	    if(curr->tag==loopvar_tag)
+	      curr->val=loopvar;
+#endif
 	    goto leave_loop;
 	 case arithmetic_operation_tag:
 	    depth=op_depth[curr->val];
@@ -1036,7 +1084,6 @@ void sum_correct_func(calculate_sum_result *retval)
        num_sequence_errors++;
        if(num_sequence_errors>max_allowed_sequence_errors)
 	 {
-	   retval->aborted=TRUE;
 	   return;
 	 }
    }
@@ -1053,6 +1100,7 @@ void sum_correct_func(calculate_sum_result *retval)
       retval->sum_correct=FALSE;
 #endif
 }
+
 calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func)
 {
 
@@ -1068,6 +1116,7 @@ calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func)
 #ifdef HUNTER
    retval.num_sequence_correct_count=0;
 #endif
+
 #ifdef MULTIPLE_RESULTS
    memset(retvals,0,MAX_NUM_RESULTS*sizeof(*retvals));
 #endif
@@ -1113,8 +1162,14 @@ calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func)
 	 }
 
 
-
+#ifdef HAVE_LOOPVAR
+   for(loopvar=0;loopvar<array_indices[0];loopvar++)
+   {
+#endif
 	 sum_func(&retval);
+#ifdef HAVE_LOOPVAR
+   }
+#endif
 	skip:
 #ifdef HUNTER
 	 good=(!retval.aborted&&(retval.sum_correct
@@ -1149,6 +1204,7 @@ calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func)
    }
    while(good&&!increment_real_coord_idx());
 #endif
+ 
    return retval;
 }
 
@@ -1213,11 +1269,11 @@ void process_fundamentals()
 #endif
 		     }
 #ifdef HUNTER
-		     if(result.sum_correct&&result.num_sequence_correct_count>prev_num_sequence_correct_count&&!result.aborted)
+		     if(result.num_sequence_correct_count>prev_num_sequence_correct_count&&!result.aborted)
 		     {
 				  
 			print_sum(sum);
-			printf("sequence_correct_count %d num_sequence_errors=%d\n",result.num_sequence_correct_count,num_sequence_errors);
+			printf("curr_depth=%d sequence_correct_count %d num_sequence_errors=%d\n",sum->stack_depth,result.num_sequence_correct_count,num_sequence_errors);
 			prev_num_sequence_correct_count=result.num_sequence_correct_count;
 		     }
 #endif

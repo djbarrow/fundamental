@@ -76,14 +76,17 @@ int sequence_func(number_t *retnum,dimension_t *array_indices)
    *retnum=1;
    return 0;
 #endif
-   int i;
+   
+   int i,n[1];
    long long fact=1;
    *retnum=1;
+   n[0]=array_indices[0];
    for(i=2;i<=(array_indices[0]+2);i++)
      {
        if((array_indices[0]+2)%i==0)
        {
-        *retnum=i;
+	 //*retnum=i-2/*-(n[0] & (0-(1 & n[0])))*/;
+	 *retnum=i-2;//(n[0] % (n[0] + (2 ^ (2 - (2 ^ n[0])))));
 	break;
        }
      }

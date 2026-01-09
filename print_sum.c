@@ -152,7 +152,6 @@ void print_sum_preamble(sum_t *sum)
       printf("result=%d ",curr_result);
 #endif
 }
-}
 #endif
 #ifdef HAVE_PRINT_SUM_INFIX
 struct infix_tree  **tree_members=NULL;
@@ -176,6 +175,11 @@ void recurse_sum_infix(depth_t rec_depth,sum_t *sum)
    
   switch(curr->tag)
     {
+#ifdef HAVE_LOOPVAR
+    case loopvar_tag:
+	      printf("l");
+	    break;
+#endif
 #ifdef HUNTER
 #ifdef HAVE_FUNCTIONS
     case  function_tag:
@@ -361,6 +365,11 @@ void print_sum_rpn(sum_t *sum)
 #endif
 	  switch(curr->tag)
 	    {
+#ifdef HAVE_LOOPVAR
+	    case loopvar_tag:
+	      printf("l");
+	    break;
+#endif
 #ifdef HUNTER
 #ifdef HAVE_FUNCTIONS
 	    case  function_tag:

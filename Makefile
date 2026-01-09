@@ -1,6 +1,6 @@
 #CC=gcc33
-CC=gcc
-#CC=clang-14
+#CC=gcc
+CC=clang-14
 OBJFILES = \
 fundamental.o \
 do_sum.o \
