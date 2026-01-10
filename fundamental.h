@@ -188,15 +188,19 @@ typedef unsigned long long uint_t;
 #define ASCII_TO_NUM atoll
 typedef unsigned long long unsigned_number_t;
 
-#if NUM_INTEGER_BITS==64
-#define RESULT_MASK (0xFFFFFFFFFFFFFFFFULL)
-#else
+#if NUM_INTEGER_BITS<64
 #define RESULT_MASK (((1ULL<<NUM_INTEGER_BITS)-1))
+#else
+#define RESULT_MASK (0xFFFFFFFFFFFFFFFFULL)
 #endif
 #ifdef SIGNED_OPERATION
 #define IS_NEGATIVE(val)  (val&(1ULL<<(NUM_INTEGER_BITS-1)))
 #define MAKE_POSITIVE(val) (((val^RESULT_MASK)+1ULL)&RESULT_MASK)
-#endif
+#else
+#define IS_NEGATIVE(val) (FALSE)
+#define MAKE_POSITIVE(val) (val)
+#endif 
+
 #else /* NUM_INTEGER_BITS>32 */
 #ifdef SIGNED_OPERATION
 typedef long number_t;
