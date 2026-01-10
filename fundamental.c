@@ -103,7 +103,7 @@ operation first_operator[max_operator_depth]=
 #ifdef HAVE_ERROR_MEASUREMENTS
 error_t error_val[NUM_ERROR_MEASUREMENTS];
 /* max_error_list_size must be >=2 */
-int    max_error_list_size=3;
+int    max_error_list_size=100;
 int    num_error_list_elements[NUM_ERROR_MEASUREMENTS];         
 struct list_head error_list[NUM_ERROR_MEASUREMENTS];
 int    refinement_depth=8;
