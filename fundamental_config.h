@@ -11,7 +11,7 @@
 //#define HAVE_ONES_COMPLIMENT_OP
 //#define HAVE_NOT_OP
 #define HAVE_ADDITION_OP
-#define HAVE_SUBTRACTION_OP
+//#define HAVE_SUBTRACTION_OP
 //#define HAVE_MULTIPLY_OP
 //#define HAVE_DIVIDE_OP
 //#define HAVE_POWER_OP
@@ -19,11 +19,11 @@
 //#define HAVE_AND_OP
 //#define HAVE_OR_OP
 #define HAVE_XOR_OP
-//#define HAVE_LOG_SHIFT_OP
+#define HAVE_LOG_SHIFT_OP
 //#define HAVE_LOG_RSHIFT_OP
 //#define HAVE_LOG_LSHIFT_OP
 //#define HAVE_ARITH_SHIFT_OP
-#define HAVE_ROTATE_OP
+//#define HAVE_ROTATE_OP
 //#define HAVE_LROTATE_OP
 //#define HAVE_RROTATE_OP
 //#define HAVE_MASK_OP
@@ -51,7 +51,7 @@
 //#define HAVE_CONSTANTS_FILE
 #define HAVE_PRINT_SUM_INFIX
 #define HAVE_PRINT_SUM_RPN
-//#define SIGNED_OPERATION
+#define SIGNED_OPERATION
 //#define MULTIPLE_RESULTS
 //#define SEED (1)
 //#define PRINT_ONLY_FIRST_CORRECT_ANSWER

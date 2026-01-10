@@ -175,6 +175,9 @@ void recurse_sum_infix(depth_t rec_depth,sum_t *sum)
    
   switch(curr->tag)
     {
+    default:
+      exit_error("invalid tag %d\n",curr->tag);
+      break;
 #ifdef HAVE_LOOPVAR
     case loopvar_tag:
 	      printf("l");
@@ -365,6 +368,9 @@ void print_sum_rpn(sum_t *sum)
 #endif
 	  switch(curr->tag)
 	    {
+	    default:
+	      exit_error("invalid tag %d\n",curr->tag);
+	      break;
 #ifdef HAVE_LOOPVAR
 	    case loopvar_tag:
 	      printf("l");
