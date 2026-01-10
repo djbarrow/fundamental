@@ -229,7 +229,7 @@ void print_progress(int sig)
 
 
 				       ],&resulttime);
-      depth_time[1]==(resulttime.tv_sec==0 ? 1:resulttime.tv_sec);
+      depth_time[1]=(resulttime.tv_sec==0 ? 1:resulttime.tv_sec);
       time_factor=depth_time[0]/depth_time[1];
       est_currdepth_time=(depth_time[0]*time_factor)/1000000;
       summation=est_currdepth_time;
@@ -318,6 +318,7 @@ depth_t get_depth_change(stack_entry *curr)
 #endif
       default:
 	 exit_error("illegal tag in get_depth_change curr=%p tag="DEPTH_CHANGE_FORMAT"\n",curr,curr_tag);
+	 return -1;
 	 
    }
 }
@@ -581,9 +582,6 @@ int increment_sum_order()
 #ifdef HAVE_FUNCTIONS
       ,num_functions
 #endif
-#ifdef MAX_NUM_LOOPVARS
-      ,num_loopvars
-#endif
       ;
    depth_t depth_change,depth;
    stack_entry *curr;
@@ -629,16 +627,15 @@ int increment_sum_order()
 	    if(idx==SKIP_DEPTH)
 	       return 1;
 	    break;
+      case invalid_tag:
+      case dummy_tag0:
+	exit_error("tag %d in increment_sum_order\n",curr->tag);
       }
    }
   leave_loop:;
 #ifdef HAVE_FUNCTIONS
-   num_functions=
+   num_functions=0;
 #endif
-#ifdef MAX_NUM_LOOPVARS
-      num_loopvars=
-#endif
-      0;
    depth=(SKIP_DEPTH ? 1:0);
    for(idx=SKIP_DEPTH;idx<sum->stack_depth;idx++)
    {
@@ -658,6 +655,8 @@ int increment_sum_order()
 	    num_functions++;
 	    break;
 #endif
+      default:
+	break;
       }
    }
    if(depth!=1)
@@ -1050,6 +1049,8 @@ int sum_switch(stack_entry *curr)
 	 if(do_sum(&curr_result_ptr,curr))
 	    return TRUE;
 	 break;
+   default:
+     break;
    }
 #ifdef RESULT_MASK
    *(curr_result_ptr-1)&=RESULT_MASK;
@@ -1269,7 +1270,7 @@ void process_fundamentals()
 #endif
 		     }
 #ifdef HUNTER
-		     if(result.num_sequence_correct_count>prev_num_sequence_correct_count&&!result.aborted)
+		     if(result.num_sequence_correct_count>=prev_num_sequence_correct_count&&!result.aborted)
 		     {
 				  
 			print_sum(sum);
