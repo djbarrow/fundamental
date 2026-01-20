@@ -1,11 +1,7 @@
 # Caveats
-As of September 2025 I'm on a lot of psychiatric medication, this means my brain isn't working great ( the joys of getting old I'm 57 now ) if you find the latest code unstable check out a version prior to September 2025, I added code for symbolic regression of loops around paddys day march 17th 2023 this made my brain melt and I threw it out. Maybe someone enthuastic will reintegrate it and remove final bugs.
-
+If you find the latest code unstable check out a version prior to September 2025, I added code for symbolic regression of loops around paddys day march 17th 2023 this made my brain melt and I threw it out. Maybe some enthuastic young turk will reintegrate it and remove final bugs.
 
 # What is fundamental
-
-
-
 Fundamental is a c command line program, a rough diamond which barely works beautifully but is my most original program to date. I've recently found out that it uses a technique called [Symbolic Regression](https://en.wikipedia.org/wiki/Symbolic_regression). It is also being marketed as Dirac because it has the inhuman talent of Dirac the famous Relativistic Detached almost Autistic Strange Genius Feynmans hero to pull inhuman crazy equations out of the air which fit data better than curve fitting, it can curve fit a sin x yes it can!!!!!, primative traditional polynomial curve fitting can't.
 
 There was code checked in around march 17th 2023 which could find loops if your forking the code to fix bugs take this code too its buggy & doesn't work but its more advanced about 30% extra code. It also does successive apporoximation a type of genetic algorithm this code might have bugs too.
