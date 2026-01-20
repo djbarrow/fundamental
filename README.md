@@ -241,4 +241,4 @@ eureqa code is commercial and similar to my code slightly tidier as a commercial
 The successive approximation/genetic algorithm HAVE_ERROR_MEASURMENTS is incomplete just leave it out of fundamental_config.h
 
 ## More about the Author
-I am a Christian, & I thank God for inspiring this code, my blog business card can be found here https://djbarrow.blogspot.com/2021/03/about-me_13.html and a Take on The Theory of everything can be found here https://sinscienceandspirituality.blogspot.com/2020/12/interesting-factoids-and-limitationsin.html
+I thank God for inspiring this code, my blog business card can be found here https://djbarrow.blogspot.com/2021/03/about-me_13.html 
