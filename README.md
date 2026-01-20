@@ -31,7 +31,7 @@ while running one fundamental you can fundamental_config.h another fundamental
 with different defines and make & run with the same arguments .
 This will increase your searchspace for answers to the question your asking.
 
-The potential discoveries made by the program so far are as follows...
+# The potential discoveries made by the program so far are as follows...
 I include 2 constants 2^1/12 the distance between semitones and the golden ratio.
 These constants are small and potentially can create the semi miraculous equations here without being
 miracolous at all I can only assume 1 in 10 any of these equations is significant.
