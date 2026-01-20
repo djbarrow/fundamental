@@ -1,3 +1,7 @@
+# Caveats
+As of September 2025 I'm on a lot of psychiatric medication, this means my brain isn't working great ( the joys of getting old I'm 57 now ) if you find the latest code unstable check out a version prior to September 2025, I added code for symbolic regression of loops around paddys day march 17th 2023 this made my brain melt and I threw it out. Maybe someone enthuastic will reintegrate it and remove final bugs.
+
+
 # What is fundamental
 
 
