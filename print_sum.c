@@ -373,7 +373,7 @@ void print_sum_rpn(sum_t *sum)
 	      break;
 #ifdef HAVE_LOOPVAR
 	    case loopvar_tag:
-	      printf("l");
+	      printf("l ");
 	    break;
 #endif
 #ifdef HUNTER

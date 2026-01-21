@@ -1,6 +1,6 @@
 /* Operations & Conditionals */
-//#define HAVE_LOOPVAR
-//#define HAVE_FACTORIAL_OP
+#define HAVE_LOOPVAR
+#define HAVE_FACTORIAL_OP
 //#define HAVE_ABS_OP
 //#define HAVE_FLOOR_OP
 //#define HAVE_CEIL_OP
@@ -11,15 +11,15 @@
 //#define HAVE_ONES_COMPLIMENT_OP
 //#define HAVE_NOT_OP
 #define HAVE_ADDITION_OP
-//#define HAVE_SUBTRACTION_OP
-//#define HAVE_MULTIPLY_OP
-//#define HAVE_DIVIDE_OP
-//#define HAVE_POWER_OP
-#define HAVE_MODULO_OP
+#define HAVE_SUBTRACTION_OP
+#define HAVE_MULTIPLY_OP
+#define HAVE_DIVIDE_OP
+#define HAVE_POWER_OP
+//#define HAVE_MODULO_OP
 //#define HAVE_AND_OP
 //#define HAVE_OR_OP
-#define HAVE_XOR_OP
-#define HAVE_LOG_SHIFT_OP
+//#define HAVE_XOR_OP
+//#define HAVE_LOG_SHIFT_OP
 //#define HAVE_LOG_RSHIFT_OP
 //#define HAVE_LOG_LSHIFT_OP
 //#define HAVE_ARITH_SHIFT_OP
@@ -47,7 +47,7 @@
 //#define REAL_HUNTER
 //#define HAVE_FUNCTIONS
 //#define NUM_HUNTER_DIMENSIONS (3)
-#define NUM_INTEGER_BITS   (64)
+//#define NUM_INTEGER_BITS   (64)
 //#define HAVE_CONSTANTS_FILE
 #define HAVE_PRINT_SUM_INFIX
 #define HAVE_PRINT_SUM_RPN
@@ -62,3 +62,5 @@
 //#define HAVE_ABS_ERROR
 //#define HAVE_ERROR_MEASUREMENTS
 //#define HAVE_LMS_ERROR
+#define LOOPVAR_LOOP 	for(loopvar=0;loopvar<8;loopvar++)
+#define STRING_LOOPVAR_LOOP #LOOPVAR_LOOP

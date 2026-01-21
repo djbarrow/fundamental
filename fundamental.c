@@ -99,6 +99,12 @@ operation first_operator[max_operator_depth]=
 #endif
 };
 
+#ifdef HAVE_LOOPVAR
+#define RESULT_STACK_END (1)
+#else
+#define RESULT_STACK_END (0)
+#endif
+
 
 #ifdef HAVE_ERROR_MEASUREMENTS
 error_t error_val[NUM_ERROR_MEASUREMENTS];
@@ -111,6 +117,7 @@ int    next_refinement_depth;
 int    skip_depth=0;
 #define SKIP_DEPTH skip_depth
 #define MAX_STACK_DEPTH next_refinement_depth
+
 
 int error_sums_good()
 {
@@ -480,6 +487,9 @@ number_range_t number_range[last_number_tag+1]=
 #ifdef HUNTER
    {0,-1,0},
 #endif
+#ifdef HAVE_LOOPVAR
+   {0,0,0},
+#endif
 #ifdef HAVE_CONSTANTS_FILE
    {0,-1,0},
 #endif
@@ -487,6 +497,22 @@ number_range_t number_range[last_number_tag+1]=
    {0,0,0},
 };
 
+
+#ifdef HAVE_LOOPVAR
+int check_all_loopvars_used()
+{
+   int idx;
+   stack_entry *curr;
+
+   for(idx=0;idx<sum->stack_depth;idx++)
+   {
+      curr=&sum->stack[idx];
+      if(curr->tag==loopvar_tag)
+	return 1;
+   }
+   return 0;
+}
+#endif
 stack_tag first_number;
 
 void init_number(stack_entry *curr)
@@ -505,45 +531,52 @@ int increment_numbers()
 #ifdef HAVE_ERROR_MEASUREMENTS
    int have_number=FALSE;
 #endif
-   done=FALSE;
-   for(idx=0;idx<sum->stack_depth;idx++)
+#ifdef HAVE_LOOPVAR
+   do
    {
-      curr=&sum->stack[idx];
-      if(is_number(curr->tag))
-      {
+#endif
+     done=FALSE;
+     for(idx=0;idx<sum->stack_depth;idx++)
+       {
+	 curr=&sum->stack[idx];
+	 if(is_number(curr->tag))
+	   {
 #ifdef HAVE_ERROR_MEASUREMENTS
-	 have_number=TRUE;
+	     have_number=TRUE;
 #endif
-	 done=FALSE;
+	     done=FALSE;
 #ifdef SIGNED_OPERATION
-	 if(curr->minus==FALSE)
-	    curr->minus=TRUE;
-	 else
+	     if(curr->minus==FALSE)
+	       curr->minus=TRUE;
+	     else
 #endif
-	 {
+	       {
 #ifdef SIGNED_OPERATION
-	    curr->minus=FALSE;
+		 curr->minus=FALSE;
 #endif
-	    curr->val++;
-	    if(curr->val>number_range[curr->tag].hi_val)
-	    {
-	       if(curr->tag>=number_range[curr->tag].next_tag)
-		  done=TRUE;
-	       curr->tag=number_range[curr->tag].next_tag;
-	       curr->val=number_range[curr->tag].lo_val;
-	       if(done)
-		  continue;
-	    }
-	 }
-	 goto finished;
-      }
-   }
-  finished:;
+		 curr->val++;
+		 if(curr->val>number_range[curr->tag].hi_val)
+		   {
+		     if(curr->tag>=number_range[curr->tag].next_tag)
+		       done=TRUE;
+		     curr->tag=number_range[curr->tag].next_tag;
+		     curr->val=number_range[curr->tag].lo_val;
+		     if(done)
+		       continue;
+		   }
+	       }
+	     goto finished;
+	   }
+       }
+   finished:;
    done=(idx>=sum->stack_depth&&(done
 #ifdef HAVE_ERROR_MEASUREMENTS
 				 ||!have_number
 #endif
 	    ));
+#ifdef HAVE_LOOPVAR
+   } while(!done&&!check_all_loopvars_used());
+#endif
    return done;
 }
 
@@ -594,19 +627,15 @@ int increment_sum_order()
 #ifdef HUNTER
 	 case dimension_tag:
 #endif
+#ifdef HAVE_LOOPVAR
+      case loopvar_tag:
+#endif
 #ifdef HAVE_CONSTANTS_FILE
 	 case constant_tag:
 #endif
-#ifdef HAVE_LOOPVAR
-      case loopvar_tag:
 
-#endif
 	 case integer_tag:
 	    init_operation(curr,min_operator_depth);
-#ifdef HAVE_LOOPVAR
-	    if(curr->tag==loopvar_tag)
-	      curr->val=loopvar;
-#endif
 	    goto leave_loop;
 	 case arithmetic_operation_tag:
 	    depth=op_depth[curr->val];
@@ -987,6 +1016,16 @@ int sum_switch(stack_entry *curr)
 
    switch(curr->tag)
    {
+#ifdef MAX_NUM_LOOPVARS
+      case loopvar_tag:
+#ifdef SIGNED_OPERATION
+	 if(curr->minus)
+	    *curr_result_ptr++=-loopvar;
+	 else
+#endif
+	    *curr_result_ptr++=loopvar[curr->val];
+	 break;
+#endif     
 #ifdef HUNTER
 #ifdef HAVE_FUNCTIONS
       case function_tag:
@@ -1145,32 +1184,34 @@ calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func)
       do
       {
 #endif
-	 curr_result_ptr=&sum->result_stack[0];
-	 for(idx=0;idx<sum->stack_depth;idx++) 
-	 {
-	    retval.aborted=sum_switch(&sum->stack[idx]);
-	    if(retval.aborted)
-	       goto skip;
-	 }
-	
-	 if((curr_result_ptr<&sum->result_stack[0])&&(curr_result_ptr>&sum->result_stack[(max_stack_depth)]))
-	 {
-	    fprintf(stderr,"Sum below is illegal curr_result_ptr(%p)"
-		    "!=&result_stack[0](%p)\n",
-		    curr_result_ptr,&sum->result_stack[0]);
-	    print_sum(sum);
-	    exit(-1); 
-	 }
-
-
 #ifdef HAVE_LOOPVAR
-   for(loopvar=0;loopvar<array_indices[0];loopvar++)
-   {
+	sum->result_stack[0]=0;
+	LOOPVAR_LOOP
+	  {
 #endif
-	 sum_func(&retval);
+	    curr_result_ptr=&sum->result_stack[RESULT_STACK_END];
+	    for(idx=0;idx<sum->stack_depth;idx++) 
+	      {
+		retval.aborted=sum_switch(&sum->stack[idx]);
+		if(retval.aborted)
+		  goto skip;
+	      }
+	    
+	    if((curr_result_ptr<&sum->result_stack[0])&&(curr_result_ptr>&sum->result_stack[(max_stack_depth)]))
+	      {
+		fprintf(stderr,"Sum below is illegal curr_result_ptr(%p)"
+			"!=&result_stack[0](%p)\n",
+			curr_result_ptr,&sum->result_stack[0]);
+		print_sum(sum);
+		exit(-1); 
+	      }
+	    
 #ifdef HAVE_LOOPVAR
-   }
-#endif
+	    sum->result_stack[0]+=sum->result_stack[RESULT_STACK_END];
+	  }
+#endif	    	    
+	sum_func(&retval);
+
 	skip:
 #ifdef HUNTER
 	 good=(!retval.aborted&&(retval.sum_correct
@@ -1498,7 +1539,7 @@ int main(int argc,char *argv[])
 #ifdef HAVE_PRINT_SUM_INFIX
 	    tree_members=(struct infix_tree **)myalloc("tree_members",sizeof(struct infix_tree *)*max_stack_depth);
 #endif
-  	    sum->result_stack=(number_t *)myalloc("result_stack",sizeof(number_t)*((max_stack_depth)));
+  	    sum->result_stack=(number_t *)myalloc("result_stack",(sizeof(number_t)*(max_stack_depth+RESULT_STACK_END)));
 	    break;
 #ifdef SEQUENCE_HUNTER
 	 case 'n':

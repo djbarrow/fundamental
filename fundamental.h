@@ -504,6 +504,9 @@ typedef enum
 #ifdef HUNTER
    dimension_tag,
 #endif
+#ifdef HAVE_LOOPVAR
+   loopvar_tag,
+#endif
 #ifdef HAVE_CONSTANTS_FILE
    constant_tag,
 #endif
@@ -513,9 +516,7 @@ typedef enum
 #ifdef HAVE_FUNCTIONS
    function_tag,
 #endif
-#ifdef HAVE_LOOPVAR
-   loopvar_tag,
-#endif
+
    dummy_tag0,
    max_tag=dummy_tag0-1
 } stack_tag;
