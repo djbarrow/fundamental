@@ -237,7 +237,7 @@ typedef unsigned long unsigned_number_t;
 #endif
 #endif
 #else /* NUM_INTEGER_BITS */
-#define SIGN_EXTEND(val)   (val)
+
 #define IS_NEGATIVE(val)  (val<0)
 #define MAKE_POSITIVE(val) (-val)
 typedef long long int_t;
@@ -250,7 +250,9 @@ typedef double number_t;
 #define NUMBER_FORMAT "%e"
 #define ASCII_TO_NUM atof
 #endif
-
+#ifndef SIGN_EXTEND
+#define SIGN_EXTEND(val)   (val)
+#endif
 
 #ifdef MULTIPLE_RESULTS
 typedef struct
