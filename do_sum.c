@@ -110,7 +110,10 @@ int do_binary_sum(number_t *result_ptr,number_t *operand,stack_entry *curr)
 #endif
 	 if(operand[0]==0)
 	 {
-	    *result_ptr=0;
+	   if(operand[1]==0)
+	     *result_ptr=1;
+	   else
+	     *result_ptr=0;
 	    break;
 	 }
 	 *result_ptr=1;

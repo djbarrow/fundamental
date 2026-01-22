@@ -1016,14 +1016,14 @@ int sum_switch(stack_entry *curr)
 
    switch(curr->tag)
    {
-#ifdef MAX_NUM_LOOPVARS
+#ifdef HAVE_LOOPVAR
       case loopvar_tag:
 #ifdef SIGNED_OPERATION
 	 if(curr->minus)
 	    *curr_result_ptr++=-loopvar;
 	 else
 #endif
-	    *curr_result_ptr++=loopvar[curr->val];
+	    *curr_result_ptr++=loopvar;
 	 break;
 #endif     
 #ifdef HUNTER
