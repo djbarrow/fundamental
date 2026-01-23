@@ -950,7 +950,7 @@ int increment_functions()
 #endif
 #endif
 #endif
-#ifdef HAVE_CONSTANTS_FILE
+#if defined(HAVE_CONSTANTS_FILE) && !defined(HUNTER)
 int check_sum()
 {
    int idx1,idx2;   
@@ -1135,7 +1135,7 @@ void sum_correct_func(calculate_sum_result *retval)
       retval->sum_correct=TRUE;
 #endif  
 #endif
-#ifdef HAVE_CONSTANTS_FILE
+#if defined(HAVE_CONSTANTS_FILE) && !defined (HUNTER)
    if(check_sum()==-1)
       retval->sum_correct=FALSE;
 #endif
@@ -1254,7 +1254,7 @@ calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func)
 
 void process_fundamentals()
 {
-   int prev_num_sequence_correct_count=0;
+   int prev_num_sequence_correct_count=1;
    int cnt=
 #ifdef HAVE_UNARY_OPERATORS
       2;

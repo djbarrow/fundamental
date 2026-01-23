@@ -16,6 +16,18 @@ int sequence_func(number_t *retnum,dimension_t *array_indices)
    return 0;
 }
 #endif
+#if 1
+number_t integral=0;
+int sequence_func(number_t *retnum,dimension_t *array_indices)
+{
+
+  double addval=((exp(pow((array_indices[0]/10.0)-10.0,-2))))*0.1;
+  integral+=addval;
+  *retnum=integral;
+  //*retnum=(/*exp*/(array_indices[0]));
+   return 0;
+}
+#endif
 #if 0
 int sequence_func(number_t *retnum,dimension_t *array_indices)
 {
@@ -59,7 +71,7 @@ int sequence_func(number_t *retnum,dimension_t *array_indices)
 }
 #endif
 
-#if 1
+#if 0
 int sequence_func(number_t *retnum,dimension_t *array_indices)
 {
 #if 0

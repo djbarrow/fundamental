@@ -1,5 +1,5 @@
 /* Operations & Conditionals */
-#define HAVE_LOOPVAR
+//#define HAVE_LOOPVAR
 #define HAVE_FACTORIAL_OP
 //#define HAVE_ABS_OP
 //#define HAVE_FLOOR_OP
@@ -11,7 +11,7 @@
 //#define HAVE_ONES_COMPLIMENT_OP
 //#define HAVE_NOT_OP
 #define HAVE_ADDITION_OP
-#define HAVE_SUBTRACTION_OP
+//#define HAVE_SUBTRACTION_OP
 #define HAVE_MULTIPLY_OP
 #define HAVE_DIVIDE_OP
 #define HAVE_POWER_OP
@@ -48,7 +48,7 @@
 //#define HAVE_FUNCTIONS
 //#define NUM_HUNTER_DIMENSIONS (3)
 //#define NUM_INTEGER_BITS   (64)
-//#define HAVE_CONSTANTS_FILE
+#define HAVE_CONSTANTS_FILE
 #define HAVE_PRINT_SUM_INFIX
 #define HAVE_PRINT_SUM_RPN
 #define SIGNED_OPERATION
