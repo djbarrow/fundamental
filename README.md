@@ -27,11 +27,13 @@ while running one fundamental you can fundamental_config.h another fundamental
 with different defines and make & run with the same arguments .
 This will increase your searchspace for answers to the question your asking.
 
-# A real discovery made by fundamental
+# A real discovery I thought i made by fundamental
 
 A relationship between the constants e and pi
 
 see discovery_e_pi_relationship.c code in the source.
+
+pi/pi=1 its an overcomplication of the maclaurin series for e.
 
 # The potential discoveries made by the program so far are as follows...
 I include 2 constants 2^1/12 the distance between semitones and the golden ratio.
