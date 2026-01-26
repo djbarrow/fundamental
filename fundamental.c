@@ -959,6 +959,21 @@ int check_sum()
 
    if(sum->result_stack[0]!=0)
    {
+#if 0
+     if(fabs(sum->result_stack[0]-(long long)sum->result_stack[0])<0.00001)
+       {
+	   for(idx1=0;idx1<sum->stack_depth;idx1++)
+	     {
+	       curr=&sum->stack[idx1];
+	       if(curr->tag==constant_tag)
+		 {
+		   printf("Found integer match %E\n",sum->result_stack[0]);
+		   print_sum(sum);
+		   break;
+		 }
+	     }
+       }
+#endif
       for(idx1=0;idx1<num_constants;idx1++)
       {
 	 for(idx2=0;idx2<sum->stack_depth;idx2++)
@@ -968,6 +983,8 @@ int check_sum()
 	       goto Skip;
 	 }
 	 curr_const=fundamental_list[idx1];
+	 
+	   
 	 if(result_correct(curr_const->value))
 	 {
 	    printf("Found match "
@@ -979,6 +996,7 @@ int check_sum()
 		   error1,
 #endif
 		   curr_const->name,curr_const->value);
+	    print_sum(sum);
 	    return(idx1);
 	 }
 	Skip:;
