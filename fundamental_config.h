@@ -1,5 +1,5 @@
 /* Operations & Conditionals */
-
+//#define HAVE_LOOPVAR
 #define HAVE_FACTORIAL_OP
 //#define HAVE_ABS_OP
 //#define HAVE_FLOOR_OP
@@ -11,7 +11,7 @@
 //#define HAVE_ONES_COMPLIMENT_OP
 //#define HAVE_NOT_OP
 #define HAVE_ADDITION_OP
-#define HAVE_SUBTRACTION_OP
+//#define HAVE_SUBTRACTION_OP
 #define HAVE_MULTIPLY_OP
 #define HAVE_DIVIDE_OP
 #define HAVE_POWER_OP
@@ -47,11 +47,11 @@
 //#define REAL_HUNTER
 //#define HAVE_FUNCTIONS
 //#define NUM_HUNTER_DIMENSIONS (3)
-//#define NUM_INTEGER_BITS   (32)
-//#define HAVE_CONSTANTS_FILE
+//#define NUM_INTEGER_BITS   (64)
+#define HAVE_CONSTANTS_FILE
 #define HAVE_PRINT_SUM_INFIX
 #define HAVE_PRINT_SUM_RPN
-//#define SIGNED_OPERATION
+#define SIGNED_OPERATION
 //#define MULTIPLE_RESULTS
 //#define SEED (1)
 //#define PRINT_ONLY_FIRST_CORRECT_ANSWER
@@ -59,3 +59,8 @@
 //#define ERROR_OP rint
 #define HAVE_PROGRESS
 //#define SPARSE_ARRAY_INDICES
+//#define HAVE_ABS_ERROR
+//#define HAVE_ERROR_MEASUREMENTS
+//#define HAVE_LMS_ERROR
+#define LOOPVAR_LOOP 	for(loopvar=0;loopvar<8;loopvar++)
+#define STRING_LOOPVAR_LOOP #LOOPVAR_LOOP

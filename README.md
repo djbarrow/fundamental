@@ -1,3 +1,6 @@
+# Caveats
+If you find the latest code unstable check out a version prior to September 2025, I added code for symbolic regression of loops around paddys day march 17th 2023 this made my brain melt and I threw it out. Maybe some enthuastic young turk will reintegrate it and remove final bugs.
+
 # What is fundamental
 Fundamental is a c command line program, a rough diamond which barely works beautifully but is my most original program to date. I've recently found out that it uses a technique called [Symbolic Regression](https://en.wikipedia.org/wiki/Symbolic_regression). It is also being marketed as Dirac because it has the inhuman talent of Dirac the famous Relativistic Detached almost Autistic Strange Genius Feynmans hero to pull inhuman crazy equations out of the air which fit data better than curve fitting, it can curve fit a sin x yes it can!!!!!, primative traditional polynomial curve fitting can't.
 
@@ -9,11 +12,37 @@ I always believed rsa could be cracked on a zx spectrum Seeing as the did a diff
 
 To protect banks I advise the following scheme Multiple encryption - Wikipedia
 
+I made an attempt at genetic programming/successive approximation in the process_fundamental related functions,
+I am unsure of the quality of this code due to mental health problems unfortunately im 56 now and code
+i wrote 20 years ago isn't easy to fix or understand and my mental health problems started 20 years ago
+I feel like Terry A Davis of templeos.org fame, I'm getting old I wish I wasn't, cest la vie.
 
 A YouTube video of the program running can be found here https://youtu.be/sD-pk9Pt4-Y
 
-The potential discoveries made by the program so far are as follows...
-However on thinking about it because the mass of neutron almost equals the mass of the proton  the mass of electron being very close
+# SMP scalability workarounds
+It is quite difficult to scale fundamental to multiple cpus of gpus
+it runs beautifully on one processor and doesn't intefere with netflix on a smp machine as the code and data seem to stay in the l1 cache
+if you've about 4 cpus you can copy 4 fundamental copies from git into different local directories 
+while running one fundamental you can fundamental_config.h another fundamental
+with different defines and make & run with the same arguments .
+This will increase your searchspace for answers to the question your asking.
+
+# A real discovery I thought i made by fundamental
+
+A relationship between the constants e and pi
+
+see discovery_e_pi_relationship.c code in the source.
+
+pi/pi=1 its an overcomplication of the maclaurin series for e.
+
+# The potential discoveries made by the program so far are as follows...
+I include 2 constants 2^1/12 the distance between semitones and the golden ratio.
+These constants are small and potentially can create the semi miraculous equations here without being
+miracolous at all I can only assume 1 in 10 any of these equations is significant.
+The reason i included semitones is string theory is 12 dimensional and so is western music an octave is 12 semitones.
+also people who have near death experiences say music is everywhere in heaven so i thought the quantity could
+be interesting see sidroth.org and iands.org for more info about peoples visits to heaven.
+However on thinking about it because the mass of neutron almost equals the mass of the proton  the mass of electron being very close einsteins theory of relativity kindof implys mass of neutron = mass of proton + electron
 to the dufference the fix of to get this more accutate to one in a thousand is about 1.6 times the mass of the electron this is an
 easy factor to come up with any number near 1.5 will do so these results I unfortunately for me think are an easy fluke.
 
@@ -208,5 +237,12 @@ Fundamental now contains a Fundamental Overview.doc readme explaining most of th
 
 P.S. Remember gdb is your friend when pulling out bugs use it you can call print_sum directly from the debugger to see how the sum trials are progressing.
 
+Please also look at github feynman.ai and their website it is more advanced in ways, feynman.ai code is in python I thought it was slow but it uses pytorch gpu magic I'm unsure if my code beats it python 100x slower vs gpu 100x faster, my code is tight pre processed C unthreaded and un networked, I like my code because its mine but this goes further than my code does in ambition. feynman.ai has dimensional analysis which I'm jealous of, it does more than my code for physics formula finding I wonder if the github feynman.ai does all it claims there isn't much code in the project and doing it in python rather than cython implys crapware, try merging the tidiest of my code with this. Also look at cern data files and jupiler note books and see if something in physics can be discovered. Nope my code doesn't have rpn to pytorch requiring a nvidia gpu most likely, feynman.ai is superior but it may have stolen the rpn idea from my code, I hope it did I got almost 3000
+readers of the joys of rpn in my sinscienceandspirituality.blogspot.com lets hope i was the origin of inspiring this code by the way symbolic regression was invented in 1975 which my code is a legacy of those who had similar ideas before me. My code was the best i could do i have to accept better now has been done.
+
+eureqa code is commercial and similar to my code slightly tidier as a commercial offering but feynman.ai is extremely interesting for physics. Tony Worm IBM github wrote a bloated java version of my code completely independently his pdf documenting his ideas is better than mine and will provide additional education for you java code java is 10x slower than c, and i use the c preprocessor to make my code more than 20x faster i basically #ifdef out unwanted code. A princeton doctorate looked at my code and did something interesting in julia with more distributed computing support google github symbolic regression princeton.
+
+The successive approximation/genetic algorithm HAVE_ERROR_MEASURMENTS is incomplete just leave it out of fundamental_config.h
+
 ## More about the Author
-I am a Christian, & I thank God for inspiring this code, my blog business card can be found here https://djbarrow.blogspot.com/2021/03/about-me_13.html and a Take on The Theory of everything can be found here https://sinscienceandspirituality.blogspot.com/2020/12/interesting-factoids-and-limitationsin.html
+I thank God for inspiring this code, my blog business card can be found here https://djbarrow.blogspot.com/2021/03/about-me_13.html 

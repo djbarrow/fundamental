@@ -187,15 +187,20 @@ typedef unsigned long long uint_t;
 /* atoll will break for unsigned numbers > signed long long */
 #define ASCII_TO_NUM atoll
 typedef unsigned long long unsigned_number_t;
-typedef unsigned long long uint_t;
 
-#if NUM_INTEGER_BITS!=64
+#if NUM_INTEGER_BITS<64
 #define RESULT_MASK (((1ULL<<NUM_INTEGER_BITS)-1))
+#else
+#define RESULT_MASK (0xFFFFFFFFFFFFFFFFULL)
+#endif
 #ifdef SIGNED_OPERATION
 #define IS_NEGATIVE(val)  (val&(1ULL<<(NUM_INTEGER_BITS-1)))
 #define MAKE_POSITIVE(val) (((val^RESULT_MASK)+1ULL)&RESULT_MASK)
-#endif
-#endif
+#else
+#define IS_NEGATIVE(val) (FALSE)
+#define MAKE_POSITIVE(val) (val)
+#endif 
+
 #else /* NUM_INTEGER_BITS>32 */
 #ifdef SIGNED_OPERATION
 typedef long number_t;
@@ -232,7 +237,7 @@ typedef unsigned long unsigned_number_t;
 #endif
 #endif
 #else /* NUM_INTEGER_BITS */
-#define SIGN_EXTEND(val)   (val)
+
 #define IS_NEGATIVE(val)  (val<0)
 #define MAKE_POSITIVE(val) (-val)
 typedef long long int_t;
@@ -245,7 +250,9 @@ typedef double number_t;
 #define NUMBER_FORMAT "%e"
 #define ASCII_TO_NUM atof
 #endif
-
+#ifndef SIGN_EXTEND
+#define SIGN_EXTEND(val)   (val)
+#endif
 
 #ifdef MULTIPLE_RESULTS
 typedef struct
@@ -499,6 +506,9 @@ typedef enum
 #ifdef HUNTER
    dimension_tag,
 #endif
+#ifdef HAVE_LOOPVAR
+   loopvar_tag,
+#endif
 #ifdef HAVE_CONSTANTS_FILE
    constant_tag,
 #endif
@@ -508,6 +518,7 @@ typedef enum
 #ifdef HAVE_FUNCTIONS
    function_tag,
 #endif
+
    dummy_tag0,
    max_tag=dummy_tag0-1
 } stack_tag;
@@ -653,9 +664,7 @@ extern void print_error_measurements(void);
 
 
 #ifdef HAVE_ERROR_MEASUREMENTS
-#define __KERNEL__
-#include <linux/list.h>
-#undef __KERNEL
+#include "list.h"
 typedef struct
 {
       struct list_head list;
@@ -669,7 +678,7 @@ extern struct list_head error_list[NUM_ERROR_MEASUREMENTS];
 typedef struct
 {
 #ifdef HUNTER
-      int num_sequence_correct_depth;
+      int num_sequence_correct_count;
 #endif
 #if !defined(NUM_INTEGER_BITS) && !defined(ERROR_OP)
       number_t sum_correct_error_tolerance;

@@ -12,6 +12,26 @@ It is licensed under GPL v2.1.
 int sequence_func(number_t *retnum,dimension_t *array_indices)
 {
 
+  *retnum=(sin(array_indices[0])*5.0)/*+(sin(array_indices[0]*3)/5.0)*//*+(sin(array_indices[0]*5)*.1)*/;
+   return 0;
+}
+#endif
+#if 1
+number_t integral=0;
+int sequence_func(number_t *retnum,dimension_t *array_indices)
+{
+
+  double addval=((exp(pow((array_indices[0]/10.0)-10.0,-2))))*0.1;
+  integral+=addval;
+  *retnum=integral;
+  //*retnum=(/*exp*/(array_indices[0]));
+   return 0;
+}
+#endif
+#if 0
+int sequence_func(number_t *retnum,dimension_t *array_indices)
+{
+
    dimension_t curr_idx;
    dimension_t *temp_indices=alloca(sizeof(dimension_t)*NUM_SEQUENCE_DIMENSIONS);
    if(array_indices[0]==0||array_indices[1]<2)
@@ -68,15 +88,20 @@ int sequence_func(number_t *retnum,dimension_t *array_indices)
    *retnum=1;
    return 0;
 #endif
-   int i;
+   
+   int i,n[1];
    long long fact=1;
    *retnum=1;
-   for(i=2;i<array_indices[0];i++)
-     if(array_indices[0]%i==0)
+   n[0]=array_indices[0];
+   for(i=2;i<=(array_indices[0]+2);i++)
+     {
+       if((array_indices[0]+2)%i==0)
        {
-        *retnum=i;
+	 //*retnum=i-2/*-(n[0] & (0-(1 & n[0])))*/;
+	 *retnum=i-2;//(n[0] % (n[0] + (2 ^ (2 - (2 ^ n[0])))));
 	break;
        }
+     }
    return 0;
 }
 #endif
@@ -203,9 +228,11 @@ int sequence_func(result_t *retnum,dimension_t *array_indices)
    return 0;
 }
 #endif
+#if 0
 int sequence_func(result_t *retnum,dimension_t *array_indices)
 {
   *retnum=exp(array_indices[0]);
    return 0;
 }
+#endif
 #endif /* SEQUENCE_HUNTER */
