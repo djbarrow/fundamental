@@ -1,6 +1,5 @@
 #CC=gcc33
 CC=gcc
-CPP=g++
 #CC=clang-14
 OBJFILES = \
 fundamental.o \
@@ -9,8 +8,6 @@ utils.o \
 print_sum.o \
 fundtest.o \
 csv.o \
-simplify.o \
-math.o
 #fundtest.o 
 #factor_test.o
 
@@ -24,9 +21,6 @@ LIBS = -lm
 
 %.o: %.c fundamental.h fundamental_config.h fundamental_sanity.h do_sum.h Makefile
 	$(CC) -c $(CFLAGS) -o $@ $<
-
-%.o: %.cpp 
-	$(CPP) -c $(CFLAGS) -o $@ $<
 
 
 fundamental: $(OBJFILES)
