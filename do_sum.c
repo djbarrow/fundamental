@@ -75,6 +75,7 @@ void init_factorials()
 int do_binary_sum(number_t *result_ptr,number_t *operand,stack_entry *curr)
 {
    operation op=curr->val;
+   operand[1]=SIGN_EXTEND(operand[1]);
    switch(op)
    {
 #ifdef HAVE_ADDITION_OP
@@ -89,7 +90,7 @@ int do_binary_sum(number_t *result_ptr,number_t *operand,stack_entry *curr)
 #endif
 #ifdef HAVE_MULTIPLY_OP
       case multiply_op:
-	 *result_ptr=SIGN_EXTEND(operand[0])*SIGN_EXTEND(operand[1]);
+	 *result_ptr=operand[0]*operand[1];
 	 break;
 #endif
 #ifdef HAVE_DIVIDE_OP
@@ -97,7 +98,7 @@ int do_binary_sum(number_t *result_ptr,number_t *operand,stack_entry *curr)
 	 if(operand[1]==0)
 	    abort_sum(-1,"division by zero aborting sum "
 		      NUMBER_FORMAT"/"NUMBER_FORMAT,operand[0],operand[1]);
-	 *result_ptr=SIGN_EXTEND(operand[0])/SIGN_EXTEND(operand[1]);
+	 *result_ptr=operand[0]/operand[1];
 	 break;
 #endif
 #ifdef HAVE_POWER_OP
@@ -291,32 +292,32 @@ int do_binary_sum(number_t *result_ptr,number_t *operand,stack_entry *curr)
 #endif
 #ifdef HAVE_GT_COND
       case gt_cond:
-	 *result_ptr=(SIGN_EXTEND(operand[0])>SIGN_EXTEND(operand[1]) ? 1:0);
+	 *result_ptr=(operand[0]>operand[1] ? 1:0);
 	 break;    
 #endif
 #ifdef HAVE_GE_COND  
       case ge_cond:
-	 *result_ptr=(SIGN_EXTEND(operand[0])>=SIGN_EXTEND(operand[1]) ? 1:0);
+	*result_ptr=(operand[0]>=operand[1] ? 1:0);
 	 break;
 #endif
 #ifdef HAVE_LT_COND
       case lt_cond:
-	 *result_ptr=(SIGN_EXTEND(operand[0])<SIGN_EXTEND(operand[1]) ? 1:0);
+	*result_ptr=(operand[0]<operand[1] ? 1:0);
 	 break;
 #endif
 #ifdef HAVE_LE_COND
       case le_cond:
-	 *result_ptr=(SIGN_EXTEND(operand[0])<=SIGN_EXTEND(operand[1]) ? 1:0);
+	 *result_ptr=(operand[0]<=operand[1] ? 1:0);
 	 break;
 #endif
 #ifdef HAVE_MIN_OP
       case min_op:
-	 *result_ptr=(SIGN_EXTEND(operand[0])<=SIGN_EXTEND(operand[1]) ? operand[0]:operand[1]);
+	 *result_ptr=(operand[0]<operand[1] ? operand[0]:operand[1]);
 	 break;
 #endif
 #ifdef HAVE_MAX_OP
       case max_op:
-	 *result_ptr=(SIGN_EXTEND(operand[0])>SIGN_EXTEND(operand[1]) ? operand[0]:operand[1]);
+	 *result_ptr=(operand[0]>operand[1] ? operand[0]:operand[1]);
 	 break;
 #endif
       default:
@@ -335,12 +336,12 @@ int do_sum(number_t **result_stack_head_ptrptr,stack_entry *curr)
    int retval;
    *result_stack_head_ptrptr+=depth_change;
    operand=result_ptr=(*result_stack_head_ptrptr)-1;
-  
+   operand[0]=SIGN_EXTEND(operand[0]);
    switch(op)
    {
 #ifdef HAVE_FACTORIAL_OP
       case factorial_op:
-	 if(SIGN_EXTEND(operand[0])<0||SIGN_EXTEND(operand[0])>max_factorial)
+	 if(operand[0]<0||operand[0]>max_factorial)
 	    abort_sum(-1,"factorial out of bounds "
 		      NUMBER_FORMAT,operand[0]);
 	 *result_ptr=
