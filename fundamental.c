@@ -55,7 +55,9 @@ int done_processing=FALSE;
 int nproc=0;
 int num_threads=0;
 pthread_t *process_thread=NULL,print_thread;
+#ifdef CQUEUE
 Queue **process_queue,*print_queue;
+#endif
 #endif
 #ifdef THREADED_CUDA
 #include <cuda_runtime.h>
@@ -994,14 +996,21 @@ void *print_sum_thread(void *args)
   int ret;
     while(TRUE)
     {
+#ifdef CQUEUE
     while(queue_length(print_queue)==0)
+#endif
       {
       sched_yield();
       ret=atomic_load(&num_threads);
       if(ret==0)
 	goto done;
       }		 
-      sum2_t *sum2=dequeue(print_queue);
+      sum2_t *sum2=
+#ifdef CQUEUE
+	dequeue(print_queue);
+#else
+      NULL;
+#endif      
       if(!sum2)
 	break;
       if(sum2->pre_buf)
@@ -1020,8 +1029,10 @@ void *print_sum_thread(void *args)
      }
     //sem_post(&print_queue->dequeue);
  done:
+#ifdef CQUEUE
   queue_free(print_queue);
   print_queue=NULL;
+#endif
   return(NULL);
 }
 
@@ -1341,7 +1352,9 @@ void queue_print_sum(FILE *restrict pre_stream,void *pre_buf,FILE  *restrict pos
 #endif  
   queue_sum->sum.result_stack=(number_t *)myalloc("result_stack",(sizeof(number_t)*(curr_sum->stack_depth+RESULT_STACK_END)));
   memcpy(queue_sum->sum.result_stack,curr_sum->result_stack,(sizeof(number_t)*(curr_sum->stack_depth+RESULT_STACK_END)));
+#ifdef CQUEUE  
   enqueue(print_queue, (void *)queue_sum);
+#endif
 }
 #endif
 
@@ -1495,7 +1508,9 @@ calculate_sum_result calculate_sum(sum_t *curr_sum,calculate_sum_func_t sum_func
 int prev_num_sequence_correct_count=1;  
 int process_sum_single_thread(
 #ifdef MULTI_THREADED
+#ifdef CQUEUE			      
 			      Queue *queue,
+#endif
 #endif
 			      sum_t *curr_sum)
 {
@@ -1560,30 +1575,51 @@ void *process_sum_thread(void *arg)
 #ifdef SEQUENCE_HUNTER  
   array_indices=myalloc("array_indices",NUM_SEQUENCE_DIMENSIONS*sizeof(dimension_t));
   temp_dimensions=myalloc("temp_dimensions",NUM_SEQUENCE_DIMENSIONS*sizeof(dimension_t));
-#endif  
+#endif
+#ifdef CQUEUE
   Queue *queue=process_queue[(int)arg];
+#endif
   do
     {
+#ifdef CQUEUE
       while(queue_length(queue)==0)
+#endif
       {
       sched_yield();
       if(done_processing)
 	goto done;
       }
-      sum_t *curr_sum=dequeue(queue);
-      process_sum_single_thread(queue,curr_sum);
+      sum_t *curr_sum=
+#ifdef CQUEUE
+	dequeue(queue)
+#else
+	NULL
+#endif
+	;
+      process_sum_single_thread(
+ #ifdef CQUEUE
+				queue,
+#endif
+				curr_sum);
       free(curr_sum->result_stack);
       free(curr_sum);
-    } while(!done_processing||queue_length(queue));
+    } while(!done_processing
+#ifdef CQUEUE
+	    ||queue_length(queue)
+#endif
+	    );
  done:
+#ifdef CQUEUE
   queue_free(queue);
   ret=atomic_fetch_sub(&num_threads,1);
   if(ret==0&&print_queue)
     sem_post(&print_queue->dequeue);
+#endif
   return NULL;
 }
 #endif			      
 #ifdef MULTI_THREADED
+#ifdef CQUEUE
 void queue_sum_order(Queue *queue,sum_t*sum)
 {
   sum_t *queue_sum=(sum_t *)myalloc("sum",offsetof(sum_t,stack[sum->stack_depth]));
@@ -1595,6 +1631,7 @@ void queue_sum_order(Queue *queue,sum_t*sum)
   //memcpy(queue_sum->sum.result_stack,sum->result_stack,(sizeof(number_t)*(sum->stack_depth+RESULT_STACK_END)));
   enqueue(queue, (void *)queue_sum);
 }
+#endif
 #endif
 
 #ifdef THREADED_CUDA
@@ -1659,8 +1696,9 @@ void process_fundamentals()
 	   i++;
 	   if(i>=nproc)
 	     i=0;
+#ifdef CQUEUE
 	   queue_sum_order(process_queue[i],sum);
-	  
+#endif	  
 #elif defined(THREADED_CUDA)
 	   i++;
 	   if(i>=nproc)
@@ -1764,16 +1802,22 @@ void start_threads()
 {
   int i;
   process_thread=(pthread_t *)myalloc("process_thread",sizeof(pthread_t)*nproc);
+#ifdef CQUEUE
   process_queue=(Queue **)myalloc("process_queue",sizeof(Queue *)*nproc);
+#endif  
   atomic_store(&num_threads,nproc);
   for(i=0;i<nproc;i++)
     {
+#ifdef CQUEUE
       process_queue[i]=queue_alloc(1024);
+#endif
       if(pthread_create(&process_thread[i],NULL,process_sum_thread,(void *)i))
 	exit_error("pthread_create thread[i] failed");
       
     }
+#ifdef CQUEUE
   print_queue=queue_alloc(1024);
+#endif
   if(pthread_create(&print_thread,NULL,print_sum_thread,NULL))
     exit_error("pthread_create print_sum_thread failed");
   

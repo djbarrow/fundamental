@@ -699,7 +699,12 @@ typedef struct
 
 typedef void (*calculate_sum_func_t)(calculate_sum_result *retval);
 #ifdef MULTI_THREADED
+#ifdef CQUEUE
 #include "c-queue/queue.h"
+#endif
+#ifdef RINGBUFFER
+#include "ringBuffer/ringBuffer.h"
+#endif
 #endif
 extern calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func);
 #ifndef NUM_INTEGER_BITS

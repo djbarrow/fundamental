@@ -65,5 +65,6 @@
 //#define LOOPVAR_LOOP 	for(loopvar=0;loopvar<8;loopvar++)
 //#define STRING_LOOPVAR_LOOP #LOOPVAR_LOOP
 #define MULTI_THREADED
+#define CQUEUE
 //#define THREADED_OPENCL
 //#define THREADED_CUDA
