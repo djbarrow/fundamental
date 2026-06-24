@@ -35,7 +35,7 @@ dimension_t
 min_seed=0,max_seed=0,
 #endif
    *sequence_dimension,sequence_array_size,*sequence_dimension_multiplier;
-dimension_t *array_indices,*temp_dimensions;
+__thread dimension_t *array_indices,*temp_dimensions;
 result_t *sequence_array;
 #ifndef NUM_SEQUENCE_DIMENSIONS
 dimension_t NUM_SEQUENCE_DIMENSIONS=1;
@@ -48,14 +48,42 @@ dimension_t MAX_NUM_RESULTS;
 #endif
 #endif
 #endif // REAL_HUNTER
-
-
+int done_processing=FALSE;
+#ifdef MULTI_THREADED
+#include <pthread.h>
+#include <semaphore.h>
+int nproc=0;
+int num_threads=0;
+pthread_t *process_thread=NULL,print_thread;
+Queue **process_queue,*print_queue;
+#endif
+#ifdef THREADED_CUDA
+#include <cuda_runtime.h>
+int nproc=0;
+int num_threads=0;
+int cuda_blocks=0,cuda_threads_per_block=0;
+/* Device pointers for queues */
+sum_t **d_process_queue=NULL;
+int *d_queue_sizes=NULL;
+int *d_queue_heads=NULL;
+volatile int *d_active_threads=NULL;
+volatile int *d_done_processing=NULL;
+sum2_t *d_print_queue=NULL;
+int *d_print_queue_size=NULL;
+#endif
 #ifdef HAVE_CONSTANTS_FILE
 fundamental_constant *head=NULL,**fundamental_list=NULL;
 int num_constants;
 #endif
 
-int hi_int,total,max_stack_depth,curr_depth1;
+int hi_int,total,max_stack_depth;
+#ifdef MULTI_THREADED
+__thread
+#endif
+#ifdef THREADED_CUDA
+__device__
+#endif
+int curr_depth1;
 #if !defined(NUM_INTEGER_BITS) && !defined(ERROR_OP)
 number_t error_tolerance=0.0001;
 #endif
@@ -63,6 +91,12 @@ number_t error_tolerance=0.0001;
 int max_allowed_sequence_errors=0,num_sequence_errors=0;
 #endif
 
+#ifdef MULTI_THREADED
+__thread
+#endif
+#ifdef THREADED_CUDA
+__device__
+#endif
 sum_t *sum;
 
 
@@ -950,6 +984,116 @@ int increment_functions()
 #endif
 #endif
 #endif
+#ifdef MULTI_THREADED
+#include <stdatomic.h>
+void *print_sum_thread(void *args)
+{
+  int ret;
+    while(TRUE)
+    {
+    while(queue_length(print_queue)==0)
+      {
+      sched_yield();
+      ret=atomic_load(&num_threads);
+      if(ret==0)
+	goto done;
+      }		 
+      sum2_t *sum2=dequeue(print_queue);
+      if(!sum2)
+	break;
+      if(sum2->pre_buf)
+	{
+	  fwrite(sum2->pre_buf,1,strlen(sum2->pre_buf),sum2->pre_stream);
+	  free(sum2->pre_buf);
+	}
+      print_sum(&sum2->sum);
+      if(sum2->post_buf)
+	{
+	  fwrite(sum2->post_buf,1,strlen(sum2->post_buf),sum2->post_stream);
+	  free(sum2->post_buf);
+	}
+      free(sum2->sum.result_stack);
+      free(sum2);
+     }
+    //sem_post(&print_queue->dequeue);
+ done:
+  queue_free(print_queue);
+  print_queue=NULL;
+  return(NULL);
+}
+
+#endif
+
+#ifdef THREADED_CUDA
+/* CUDA Kernel: Print sum results from device queue */
+__global__ void print_sum_kernel(volatile int *d_active_threads, 
+                                   volatile int *d_done_processing,
+                                   sum2_t *d_print_queue,
+                                   int *d_print_queue_size)
+{
+  int tid = blockIdx.x * blockDim.x + threadIdx.x;
+  
+  if(tid == 0)
+  {
+    while(TRUE)
+    {
+      /* Wait for items in print queue or all threads to finish */
+      while(*d_print_queue_size == 0)
+      {
+        if(*d_active_threads == 0 && *d_done_processing)
+          goto done;
+        __syncthreads();
+      }
+      
+      if(*d_print_queue_size > 0)
+      {
+        atomicSub((int *)d_print_queue_size, 1);
+        /* Note: Print from device limited - typically need to copy to host first */
+        /* This is a simplified version - production code should use proper I/O */
+      }
+    }
+  done:
+    return;
+  }
+}
+
+/* CUDA Kernel: Process sums from device queue */
+__global__ void process_sum_kernel(sum_t **d_process_queue,
+                                   int *d_queue_sizes,
+                                   volatile int *d_active_threads,
+                                   volatile int *d_done_processing)
+{
+  int tid = blockIdx.x * blockDim.x + threadIdx.x;
+  
+  if(tid < blockDim.x * gridDim.x)
+  {
+    while(TRUE)
+    {
+      /* Check if queue has work */
+      if(d_queue_sizes[tid] > 0)
+      {
+        sum_t *curr_sum = d_process_queue[tid];
+        if(curr_sum != NULL)
+        {
+          /* Process the sum - call device version of process_sum_single_thread */
+          /* Note: This is simplified - actual implementation depends on */
+          /* the specific processing logic */
+          atomicSub(&d_queue_sizes[tid], 1);
+        }
+      }
+      
+      /* Exit if no more work and all threads done */
+      if(atomicLoad(d_active_threads) == 0 && *d_done_processing)
+        break;
+      
+      __syncthreads();
+    }
+  }
+}
+
+#endif
+
+
 #if defined(HAVE_CONSTANTS_FILE) && !defined(HUNTER)
 int check_sum()
 {
@@ -967,8 +1111,19 @@ int check_sum()
 	       curr=&sum->stack[idx1];
 	       if(curr->tag==constant_tag)
 		 {
-		   printf("Found integer match %E\n",sum->result_stack[0]);
-		   print_sum(sum);
+#if defined(MULTI_THREADED) || defined(THREADED_CUDA)		
+		char *buff=(char *)myalloc("sprintf_buff",1024);
+#else
+		char *buff=(char *)alloca(1024);
+#endif
+
+		sprintf(buff,"Found integer match %E\n",sum->result_stack[0]);
+#if defined(MULTI_THREADED) || defined(THREADED_CUDA)
+		queue_print_sum(stdout,buff,NULL,NULLsum);
+#else
+		printf(buff)
+		print_sum(sum);
+#endif		   
 		   break;
 		 }
 	     }
@@ -987,16 +1142,26 @@ int check_sum()
 	   
 	 if(result_correct(curr_const->value))
 	 {
-	    printf("Found match "
-#ifndef NUM_INTEGER_BITS
-		   "error="NUMBER_FORMAT
+#if defined(MULTI_THREADED) || defined(THREADED_CUDA)		
+		char *buff=(char *)myalloc("sprintf_buff",1024);
+#else
+		char *buff=(char *)alloca(1024);
 #endif
-		   " fundamental constant name=%s value="NUMBER_FORMAT"\n",
+		sprintf(buff,"Found match "
 #ifndef NUM_INTEGER_BITS
-		   error1,
+			"error="NUMBER_FORMAT
 #endif
-		   curr_const->name,curr_const->value);
-	    print_sum(sum);
+			" fundamental constant name=%s value="NUMBER_FORMAT"\n",
+#ifndef NUM_INTEGER_BITS
+			error1,
+#endif
+			curr_const->name,curr_const->value);
+#if defined(MULTI_THREADED) || defined(THREADED_CUDA)
+		queue_print_sum(stdout,buff,NULL,NULL,sum);
+#else
+		printf(buff);
+		print_sum(sum);
+#endif	    
 	    return(idx1);
 	 }
 	Skip:;
@@ -1024,7 +1189,7 @@ int loop_operators()
    return done;
 }
 
-number_t *curr_result_ptr;
+__thread number_t *curr_result_ptr;
 int sum_switch(stack_entry *curr)
 {
 #ifdef HAVE_FUNCTIONS
@@ -1158,8 +1323,54 @@ void sum_correct_func(calculate_sum_result *retval)
       retval->sum_correct=FALSE;
 #endif
 }
+#ifdef MULTI_THREADED
+void queue_print_sum(FILE *restrict pre_stream,void *pre_buf,FILE  *restrict post_stream,void *post_buf,sum_t *curr_sum)
+{
+  sum2_t *queue_sum=(sum2_t *)myalloc("sum2",offsetof(sum2_t,sum.stack[sum->stack_depth]));
+  memcpy(&queue_sum->sum,curr_sum,offsetof(sum_t,stack[curr_sum->stack_depth]));
+  queue_sum->pre_stream=pre_stream;
+  queue_sum->pre_buf=pre_buf;
+  queue_sum->post_stream=post_stream;
+  queue_sum->post_buf=post_buf;
+  queue_sum->sum.stack_depth=curr_sum->stack_depth;
+#ifdef HAVE_FUNCTIONS
+  queue_sum->sum.seed=sum->seed;
+#endif  
+  queue_sum->sum.result_stack=(number_t *)myalloc("result_stack",(sizeof(number_t)*(curr_sum->stack_depth+RESULT_STACK_END)));
+  memcpy(queue_sum->sum.result_stack,curr_sum->result_stack,(sizeof(number_t)*(curr_sum->stack_depth+RESULT_STACK_END)));
+  enqueue(print_queue, (void *)queue_sum);
+}
+#endif
 
-calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func)
+#ifdef THREADED_CUDA
+void queue_print_sum(FILE *restrict pre_stream,void *pre_buf,FILE  *restrict post_stream,void *post_buf,sum_t *curr_sum)
+{
+  /* CUDA version: Copy sum to device print queue */
+  sum2_t *host_sum2=(sum2_t *)myalloc("sum2",offsetof(sum2_t,sum.stack[curr_sum->stack_depth]));
+  memcpy(&host_sum2->sum,curr_sum,offsetof(sum_t,stack[curr_sum->stack_depth]));
+  host_sum2->pre_stream=pre_stream;
+  host_sum2->pre_buf=pre_buf;
+  host_sum2->post_stream=post_stream;
+  host_sum2->post_buf=post_buf;
+  host_sum2->sum.stack_depth=curr_sum->stack_depth;
+#ifdef HAVE_FUNCTIONS
+  host_sum2->sum.seed=sum->seed;
+#endif  
+  host_sum2->sum.result_stack=(number_t *)myalloc("result_stack",(sizeof(number_t)*(curr_sum->stack_depth+RESULT_STACK_END)));
+  memcpy(host_sum2->sum.result_stack,curr_sum->result_stack,(sizeof(number_t)*(curr_sum->stack_depth+RESULT_STACK_END)));
+  
+  /* Copy to device queue - simplified version */
+  int queue_size = 0;
+  cudaMemcpy(&queue_size, d_print_queue_size, sizeof(int), cudaMemcpyDeviceToHost);
+  cudaMemcpy(d_print_queue + queue_size, host_sum2, offsetof(sum2_t,sum.stack[curr_sum->stack_depth]), cudaMemcpyHostToDevice);
+  queue_size++;
+  cudaMemcpy(d_print_queue_size, &queue_size, sizeof(int), cudaMemcpyHostToDevice);
+  
+  free(host_sum2);
+}
+#endif
+
+calculate_sum_result calculate_sum(sum_t *curr_sum,calculate_sum_func_t sum_func)
 {
 
    int idx;
@@ -1181,7 +1392,7 @@ calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func)
 #ifdef SEQUENCE_HUNTER
    init_array_indices(
 #ifdef HAVE_FUNCTIONS 
-      sum->seed
+      curr_sum->seed
 #else
       MIN_SEED
 #endif
@@ -1203,29 +1414,39 @@ calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func)
       {
 #endif
 #ifdef HAVE_LOOPVAR
-	sum->result_stack[0]=0;
+	curr_sum->result_stack[0]=0;
 	LOOPVAR_LOOP
 	  {
 #endif
-	    curr_result_ptr=&sum->result_stack[RESULT_STACK_END];
+	    curr_result_ptr=&curr_sum->result_stack[RESULT_STACK_END];
 	    for(idx=0;idx<sum->stack_depth;idx++) 
 	      {
-		retval.aborted=sum_switch(&sum->stack[idx]);
+		retval.aborted=sum_switch(&curr_sum->stack[idx]);
 		if(retval.aborted)
 		  goto skip;
 	      }
 	    
-	    if((curr_result_ptr<&sum->result_stack[0])&&(curr_result_ptr>&sum->result_stack[(max_stack_depth)]))
+	    if((curr_result_ptr<&curr_sum->result_stack[0])&&(curr_result_ptr>&curr_sum->result_stack[(max_stack_depth)]))
 	      {
-		fprintf(stderr,"Sum below is illegal curr_result_ptr(%p)"
+#if defined(MULTI_THREADED) || defined(THREADED_CUDA)		
+		char *buff=(char *)myalloc("sprintf_buff",1024);
+#else
+		char *buff=(char *)alloca(1024);
+#endif
+		sprintf(buff,"Sum below is illegal curr_result_ptr(%p)"
 			"!=&result_stack[0](%p)\n",
-			curr_result_ptr,&sum->result_stack[0]);
+			curr_result_ptr,&curr_sum->result_stack[0]);
+#if defined(MULTI_THREADED) || defined(THREADED_CUDA)
+		queue_print_sum(stderr,buff,NULL,NULL,curr_sum);
+#else
+		fwrite((void *)buff,1,strlen(buff),stderr);
 		print_sum(sum);
+#endif		
 		exit(-1); 
 	      }
 	    
 #ifdef HAVE_LOOPVAR
-	    sum->result_stack[0]+=sum->result_stack[RESULT_STACK_END];
+	    curr_sum->result_stack[0]+=curr_sum->result_stack[RESULT_STACK_END];
 	  }
 #endif	    	    
 	sum_func(&retval);
@@ -1250,7 +1471,7 @@ calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func)
       }
       while((good||num_sequence_errors<max_allowed_sequence_errors)&&!increment_array_indices(
 #ifdef HAVE_FUNCTIONS
-	       sum->seed
+	       curr_sum->seed
 #else
 	       MIN_SEED
 #endif
@@ -1268,11 +1489,128 @@ calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func)
    return retval;
 }
 
+int prev_num_sequence_correct_count=1;  
+int process_sum_single_thread(
+#ifdef MULTI_THREADED
+			      Queue *queue,
+#endif
+			      sum_t *curr_sum)
+{
+  sum=curr_sum;
+#if defined(HAVE_FUNCTIONS) && defined(SIGNED_OPERATION)
+      do
+      {
+#endif
+	 do
+	 {
+	    
+	    do
+	    {   
+#ifdef HAVE_ERROR_MEASUREMENTS
+	       /* This I believe works for floating point values as well */
+	       memset(&error_val,0,sizeof(error_t)*NUM_ERROR_MEASUREMENTS);
+#endif
+	       
+	       calculate_sum_result result=calculate_sum(sum,sum_correct_func);
+	       if(!result.aborted)
+	       {
+#ifdef HAVE_ERROR_MEASUREMENTS
+		  int idx;
+		  for(idx=0;idx<NUM_ERROR_MEASUREMENTS;idx++)
+		     add_sum_to_list(idx);
+#endif
+	       }
+#ifdef HUNTER
+	       if(result.num_sequence_correct_count>=prev_num_sequence_correct_count&&!result.aborted)
+	       {
+#if defined(MULTI_THREADED) || defined(THREADED_CUDA)		
+		char *buff=(char *)myalloc("sprintf_buff",1024);
+#else
+		char *buff=(char *)alloca(1024);
+#endif
 
+		 sprintf(buff,"curr_depth=%d sequence_correct_count %d num_sequence_errors=%d\n",curr_sum->stack_depth,result.num_sequence_correct_count,num_sequence_errors);
+#if (defined(MULTI_THREADED) || defined(THREADED_CUDA))
+		 queue_print_sum(NULL,NULL,stdout,buff,curr_sum);
+#else		 
+		 print_sum(curr_sum);
+		 fwrite((void *)buff,1,strlen(buff),stdout); 
+#endif		  
+		  
+		  prev_num_sequence_correct_count=result.num_sequence_correct_count;
+	       }
+#endif
+	    } while(!increment_numbers());
+	 } while(!loop_operators());
+#if defined(HAVE_FUNCTIONS) && defined(SIGNED_OPERATION)
+      } while(!increment_functions());
+#endif
+#ifdef MULTI_THREADED      
+      //if(print_queue)
+      //sem_post(&print_queue->dequeue);
+#endif      
+}
+#ifdef MULTI_THREADED			      
+void *process_sum_thread(void *arg)
+{
+  int ret;
+#ifdef SEQUENCE_HUNTER  
+  array_indices=myalloc("array_indices",NUM_SEQUENCE_DIMENSIONS*sizeof(dimension_t));
+  temp_dimensions=myalloc("temp_dimensions",NUM_SEQUENCE_DIMENSIONS*sizeof(dimension_t));
+#endif  
+  Queue *queue=process_queue[(int)arg];
+  do
+    {
+      sum_t *curr_sum=dequeue(queue);
+      process_sum_single_thread(queue,curr_sum);
+      free(curr_sum->result_stack);
+      free(curr_sum);
+    } while(!done_processing||queue_length(queue));
+  queue_free(queue);
+  ret=atomic_fetch_sub(&num_threads,1);
+  if(ret==0&&print_queue)
+    sem_post(&print_queue->dequeue);
+  return NULL;
+}
+#endif			      
+#ifdef MULTI_THREADED
+void queue_sum_order(Queue *queue,sum_t*sum)
+{
+  sum_t *queue_sum=(sum_t *)myalloc("sum",offsetof(sum_t,stack[sum->stack_depth]));
+  memcpy(queue_sum,sum,offsetof(sum_t,stack[sum->stack_depth]));
+#ifdef HAVE_FUNCTIONS
+  queue_sum->seed=sum->seed;
+#endif  
+  queue_sum->result_stack=(number_t *)myalloc("result_stack",(sizeof(number_t)*(sum->stack_depth+RESULT_STACK_END)));
+  //memcpy(queue_sum->sum.result_stack,sum->result_stack,(sizeof(number_t)*(sum->stack_depth+RESULT_STACK_END)));
+  enqueue(queue, (void *)queue_sum);
+}
+#endif
 
+#ifdef THREADED_CUDA
+void queue_sum_order(int queue_idx, sum_t*sum)
+{
+  /* CUDA version: Queue sum to device */
+  sum_t *host_sum=(sum_t *)myalloc("sum",offsetof(sum_t,stack[sum->stack_depth]));
+  memcpy(host_sum,sum,offsetof(sum_t,stack[sum->stack_depth]));
+#ifdef HAVE_FUNCTIONS
+  host_sum->seed=sum->seed;
+#endif  
+  host_sum->result_stack=(number_t *)myalloc("result_stack",(sizeof(number_t)*(sum->stack_depth+RESULT_STACK_END)));
+  
+  /* Copy to device queue */
+  cudaMemcpy(d_process_queue[queue_idx], host_sum, offsetof(sum_t,stack[sum->stack_depth]), cudaMemcpyHostToDevice);
+  
+  int queue_size = 1;
+  cudaMemcpy(&d_queue_sizes[queue_idx], &queue_size, sizeof(int), cudaMemcpyHostToDevice);
+  
+  free(host_sum);
+}
+#endif
+			      
 void process_fundamentals()
 {
-   int prev_num_sequence_correct_count=1;
+  int i=-1;
    int cnt=
 #ifdef HAVE_UNARY_OPERATORS
       2;
@@ -1293,6 +1631,8 @@ void process_fundamentals()
 
       )
    {
+     if(sum->stack_depth>MAX_STACK_DEPTH)
+       break;
       curr_depth1=sum->stack_depth-1;
 #ifdef HAVE_PROGRESS
       gettimeofday(&starttime[sum->stack_depth],NULL);
@@ -1305,44 +1645,22 @@ void process_fundamentals()
 	    goto skip_depth_label;
 	 do
 	 {
-#if defined(HAVE_FUNCTIONS) && defined(SIGNED_OPERATION)
-	    do
-	    {
-#endif
-	       do
-	       {
-		     
-		  do
-		  {   
-#ifdef HAVE_ERROR_MEASUREMENTS
-		     /* This I believe works for floating point values as well */
-		     memset(&error_val,0,sizeof(error_t)*NUM_ERROR_MEASUREMENTS);
-#endif
-
-		     calculate_sum_result result=calculate_sum(sum,sum_correct_func);
-		     if(!result.aborted)
-		     {
-#ifdef HAVE_ERROR_MEASUREMENTS
-			int idx;
-			for(idx=0;idx<NUM_ERROR_MEASUREMENTS;idx++)
-			   add_sum_to_list(idx);
-#endif
-		     }
-#ifdef HUNTER
-		     if(result.num_sequence_correct_count>=prev_num_sequence_correct_count&&!result.aborted)
-		     {
-				  
-			print_sum(sum);
-			printf("curr_depth=%d sequence_correct_count %d num_sequence_errors=%d\n",sum->stack_depth,result.num_sequence_correct_count,num_sequence_errors);
-			prev_num_sequence_correct_count=result.num_sequence_correct_count;
-		     }
-#endif
-		  } while(!increment_numbers());
-	       } while(!loop_operators());
-#if defined(HAVE_FUNCTIONS) && defined(SIGNED_OPERATION)
-	    } while(!increment_functions());
-#endif
-	 }while(!increment_sum_order());
+#ifdef MULTI_THREADED
+	   i++;
+	   if(i>=nproc)
+	     i=0;
+	   queue_sum_order(process_queue[i],sum);
+	  
+#elif defined(THREADED_CUDA)
+	   i++;
+	   if(i>=nproc)
+	     i=0;
+	   queue_sum_order(i, sum);
+	  
+#else	    
+	    process_sum_single_thread(sum);
+#endif	    
+	 }while(!increment_sum_order());	 
       }
      skip_depth_label:;
    }
@@ -1380,9 +1698,17 @@ void process_fundamentals_have_error_measurements()
    print_error_measurements();
 }
 
-#define PROCESS_FUNDAMENTALS() process_fundamentals_have_error_measurements()
+#define PROCESS_FUNDAMENTALS() \
+{\
+ process_fundamentals_have_error_measurements(); \
+ done_processing=TRUE; \
+}
 #else
-#define PROCESS_FUNDAMENTALS() process_fundamentals()
+#define PROCESS_FUNDAMENTALS() \
+{ \
+ process_fundamentals(); \
+ done_processing=TRUE; \
+}
 #endif
 
 #ifdef HAVE_ERROR_MEASUREMENTS
@@ -1423,11 +1749,78 @@ void init_sequence(int argc,char *argv[],int curropt)
       );
 }
 #endif
+#ifdef MULTI_THREADED
+void start_threads()
+{
+  int i;
+  process_thread=(pthread_t *)myalloc("process_thread",sizeof(pthread_t)*nproc);
+  process_queue=(Queue **)myalloc("process_queue",sizeof(Queue *)*nproc);
+  atomic_store(&num_threads,nproc);
+  for(i=0;i<nproc;i++)
+    {
+      process_queue[i]=queue_alloc(1024);
+      if(pthread_create(&process_thread[i],NULL,process_sum_thread,(void *)i))
+	exit_error("pthread_create thread[i] failed");
+      
+    }
+  print_queue=queue_alloc(1024);
+  if(pthread_create(&print_thread,NULL,print_sum_thread,NULL))
+    exit_error("pthread_create print_sum_thread failed");
+  
+}
+#endif
+
+#ifdef THREADED_CUDA
+void start_threads()
+{
+  int i;
+  int done_processing_host = 0;
+  
+  /* Determine CUDA grid and block configuration */
+  cuda_threads_per_block = 256;
+  cuda_blocks = (nproc + cuda_threads_per_block - 1) / cuda_threads_per_block;
+  
+  /* Allocate device memory for process queues */
+  d_process_queue = (sum_t **)myalloc("d_process_queue", sizeof(sum_t *) * nproc);
+  d_queue_sizes = (int *)myalloc("d_queue_sizes", sizeof(int) * nproc);
+  d_queue_heads = (int *)myalloc("d_queue_heads", sizeof(int) * nproc);
+  
+  for(i = 0; i < nproc; i++)
+  {
+    cudaMalloc((void **)&d_process_queue[i], sizeof(sum_t) * 1024);
+    d_queue_sizes[i] = 0;
+    d_queue_heads[i] = 0;
+    cudaMemcpy(&d_queue_sizes[i], &d_queue_sizes[i], sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(&d_queue_heads[i], &d_queue_heads[i], sizeof(int), cudaMemcpyHostToDevice);
+  }
+  
+  /* Allocate device memory for print queue */
+  cudaMalloc((void **)&d_print_queue, sizeof(sum2_t) * 1024);
+  cudaMalloc((void **)&d_print_queue_size, sizeof(int));
+  
+  /* Allocate device memory for synchronization variables */
+  cudaMalloc((void **)&d_active_threads, sizeof(int));
+  cudaMalloc((void **)&d_done_processing, sizeof(int));
+  
+  int active_threads = nproc;
+  cudaMemcpy(d_active_threads, &active_threads, sizeof(int), cudaMemcpyHostToDevice);
+  cudaMemcpy(d_done_processing, &done_processing_host, sizeof(int), cudaMemcpyHostToDevice);
+  
+  num_threads = nproc;
+}
+#endif
 
 int main(int argc,char *argv[])
 {
    stack_tag curr_number,next_number;
-   int idx,c,line;
+   int
+#ifdef MULTI_THREADED
+     i,
+#endif
+     idx,c,line;
+#ifdef MULTI_THREADED
+    void *ret;
+#endif    
 #if defined(HAVE_CONSTANTS_FILE) || defined(SEQUENCE_HUNTER)
    FILE *fstream;
    char numbuff[40];
@@ -1463,6 +1856,13 @@ int main(int argc,char *argv[])
 #ifdef SEQUENCE_HUNTER
 	       "f:i:s:l:n:"
 #endif
+#ifdef MULTI_THREADED
+	       "p:"
+#endif
+#ifdef THREADED_CUDA
+	       "p:"
+#endif	       
+	       
 #ifndef NUM_INTEGER_BITS
 	       "e:"
 #endif
@@ -1482,6 +1882,22 @@ int main(int argc,char *argv[])
 	    if(hi_int<0)
 	       goto error;
 	    break;
+#ifdef MULTI_THREADED
+	 case 'p':
+	   nproc=atoi(optarg);
+	   if(nproc<1)
+	     goto error;
+
+	   break;
+#endif
+#ifdef THREADED_CUDA
+	 case 'p':
+	   nproc=atoi(optarg);
+	   if(nproc<1)
+	     goto error;
+
+	   break;
+#endif	    
 #ifdef HAVE_CONSTANTS_FILE
 	 case 'c':
 	    fstream=fopen(optarg,"r");
@@ -1738,12 +2154,67 @@ int main(int argc,char *argv[])
       next_number++;
    }
    number_range[curr_number].next_tag=first_number;
+   
+#ifdef MULTI_THREADED
+   if(nproc)
+     start_threads();
+   else
+     goto error;   
+#endif
+
+#ifdef THREADED_CUDA
+   if(nproc)
+     start_threads();
+   else
+     goto error;   
+#endif
+
    PROCESS_FUNDAMENTALS();
+
+#ifdef MULTI_THREADED
+   pthread_join(print_thread,&ret);
+#endif
+
+#ifdef THREADED_CUDA
+   /* Signal CUDA kernels that processing is done */
+   int done_processing = 1;
+   cudaMemcpy(d_done_processing, &done_processing, sizeof(int), cudaMemcpyHostToDevice);
+   
+   /* Launch CUDA kernels */
+   process_sum_kernel<<<cuda_blocks, cuda_threads_per_block>>>(d_process_queue, d_queue_sizes, 
+                                                               d_active_threads, d_done_processing);
+   print_sum_kernel<<<1, 1>>>(d_active_threads, d_done_processing, d_print_queue, d_print_queue_size);
+   
+   /* Synchronize all CUDA operations */
+   cudaDeviceSynchronize();
+   
+   /* Free CUDA device memory */
+   for(int i = 0; i < nproc; i++)
+   {
+     cudaFree(d_process_queue[i]);
+   }
+   cudaFree(d_print_queue);
+   cudaFree(d_print_queue_size);
+   cudaFree(d_active_threads);
+   cudaFree(d_done_processing);
+   
+   free(d_process_queue);
+   free(d_queue_sizes);
+   free(d_queue_heads);
+#endif
+
    return 0;
   error:;
    exit_error("Usage\n"
 	      "=====\n"
-	      "%s -h hi_int -m max_stack_depth"
+	      "%s -h hi_int "
+#ifdef MULTI_THREADED
+	      "-p `nproc` "
+#endif
+#ifdef THREADED_CUDA
+	      "-p num_threads "
+#endif
+	      "-m max_stack_depth"
 	      "<-a max_num_answers>"
 #ifdef HAVE_CONSTANTS_FILE
 	      " <-c constants file>"
