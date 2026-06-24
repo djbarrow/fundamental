@@ -88,7 +88,7 @@ int curr_depth1;
 number_t error_tolerance=0.0001;
 #endif
 #ifdef SEQUENCE_HUNTER
-int max_allowed_sequence_errors=0,num_sequence_errors=0;
+int max_allowed_sequence_errors=0;
 #endif
 
 #ifdef MULTI_THREADED
@@ -1307,13 +1307,13 @@ void sum_correct_func(calculate_sum_result *retval)
    }
 #ifdef SEQUENCE_HUNTER
    else {
-       num_sequence_errors++;
-       if(num_sequence_errors>max_allowed_sequence_errors)
+       retval->num_sequence_errors++;
+       if(retval->num_sequence_errors>max_allowed_sequence_errors)
 	 {
 	   return;
 	 }
    }
-   if((retval->num_sequence_correct_count+num_sequence_errors>=idx)&&num_sequence_errors<=max_allowed_sequence_errors)
+   if((retval->num_sequence_correct_count+retval->num_sequence_errors>=idx)&&retval->num_sequence_errors<=max_allowed_sequence_errors)
       retval->sum_correct=TRUE;
 #endif
 #ifdef REAL_HUNTER
@@ -1412,7 +1412,7 @@ calculate_sum_result calculate_sum(sum_t *curr_sum,calculate_sum_func_t sum_func
    {
 #endif
 #ifdef SEQUENCE_HUNTER
-     num_sequence_errors=0;
+     retval.num_sequence_errors=0;
       do
       {
 #endif
@@ -1472,7 +1472,7 @@ calculate_sum_result calculate_sum(sum_t *curr_sum,calculate_sum_func_t sum_func
 #endif // HUNTER   
 #ifdef SEQUENCE_HUNTER
       }
-      while((good||num_sequence_errors<max_allowed_sequence_errors)&&!increment_array_indices(
+      while((good||retval.num_sequence_errors<max_allowed_sequence_errors)&&!increment_array_indices(
 #ifdef HAVE_FUNCTIONS
 	       curr_sum->seed
 #else
@@ -1532,7 +1532,7 @@ int process_sum_single_thread(
 		char *buff=(char *)alloca(1024);
 #endif
 
-		 sprintf(buff,"curr_depth=%d sequence_correct_count %d num_sequence_errors=%d\n",curr_sum->stack_depth,result.num_sequence_correct_count,num_sequence_errors);
+		sprintf(buff,"curr_depth=%d sequence_correct_count %d num_sequence_errors=%d\n",curr_sum->stack_depth,result.num_sequence_correct_count,result.num_sequence_errors);
 #if (defined(MULTI_THREADED) || defined(THREADED_CUDA))
 		 queue_print_sum(NULL,NULL,stdout,buff,curr_sum);
 #else		 

@@ -628,9 +628,9 @@ typedef struct
 #include <stdio.h>
 typedef struct
 {
-  FILE *restrict pre_stream;
+  FILE *pre_stream;
   void *pre_buf;
-  FILE  *restrict post_stream;
+  FILE  *post_stream;
   void *post_buf;
   sum_t sum;
 } sum2_t;
@@ -688,6 +688,7 @@ typedef struct
 {
 #ifdef HUNTER
       int num_sequence_correct_count;
+      int num_sequence_errors;
 #endif
 #if !defined(NUM_INTEGER_BITS) && !defined(ERROR_OP)
       number_t sum_correct_error_tolerance;
