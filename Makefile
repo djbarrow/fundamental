@@ -15,7 +15,7 @@ c-queue/queue.o
 #factor_test.o
 
 CPATH=$(CPATH);.
-CFLAGS= -g -DLINUX -I/usr/local/cuda/include
+CFLAGS= -g -DLINUX #-I/usr/local/cuda/include
 
 #CFLAGS=-O2 -g
 LINKFLAGS =
@@ -25,7 +25,7 @@ LIBS = -lm #-L/usr/local/cuda/lib64 -lcuda -lcudart
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 %.o: %.cu fundamental.h fundamental_config.h fundamental_sanity.h do_sum.h Makefile
-	$(CC) -c $(CFLAGS) -o $@ $<
+	nvcc -c $(CFLAGS) -o $@ $<
 
 
 fundamental: $(OBJFILES)
