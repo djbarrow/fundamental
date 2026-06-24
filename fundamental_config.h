@@ -57,13 +57,13 @@
 //#define PRINT_ONLY_FIRST_CORRECT_ANSWER
 #define NUM_ANSWERS (1)
 //#define ERROR_OP rint
-#define HAVE_PROGRESS
+//#define HAVE_PROGRESS
 //#define SPARSE_ARRAY_INDICES
 //#define HAVE_ABS_ERROR
 //#define HAVE_ERROR_MEASUREMENTS
 //#define HAVE_LMS_ERROR
 //#define LOOPVAR_LOOP 	for(loopvar=0;loopvar<8;loopvar++)
 //#define STRING_LOOPVAR_LOOP #LOOPVAR_LOOP
-#define MULTI_THREADED
+//#define MULTI_THREADED
 //#define THREADED_OPENCL
-//#define THREADED_CUDA
+#define THREADED_CUDA

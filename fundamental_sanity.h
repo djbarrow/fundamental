@@ -63,3 +63,15 @@
 #if defined(REAL_HUNTER) && defined (SEQUENCE_HUNTER)
 #error "REAL_HUNTER and SEQUENCE_HUNTER cannot be defined simultaineously."
 #endif
+#if defined(MULTI_THREADED) && defined(OPENCL)
+#error "MULTI_THREADED and OPENCL cannot be defined simultatineusly"
+#endif
+#if defined(THREADED_CUDA) && defined(OPENCL)
+#error "THREADED_CUDA and OPENCL cannot be defined simultatineusly"
+#endif
+#if defined(MULTI_THREADED) && ( defined(THREADED_CUDA) || defined(THREADED_OPENCL))
+#error "MULTI_THREADED and THREADED_CUDA or THREADED_OPENCL cannot be defined simultaneously"
+#ifdef HAVE_PROGRESS
+#error "MULTI_THREADED and THREADED_CUDA or THREADED_OPENCL cannot be defined with HAVE_PROGRESS"
+#endif
+#endif
