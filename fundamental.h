@@ -625,6 +625,15 @@ typedef struct
       stack_entry stack[];
 } sum_t;
 
+#include <stdio.h>
+typedef struct
+{
+  FILE *restrict pre_stream;
+  void *pre_buf;
+  FILE  *restrict post_stream;
+  void *post_buf;
+  sum_t sum;
+} sum2_t;
 
 #if defined(MULTIPLE_RESULTS) || defined(HAVE_FUNCTIONS) 
 extern void print_sum_preamble(sum_t *sum);
@@ -688,6 +697,9 @@ typedef struct
 } calculate_sum_result;
 
 typedef void (*calculate_sum_func_t)(calculate_sum_result *retval);
+#ifdef MULTI_THREADED
+#include "c-queue/queue.h"
+#endif
 extern calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func);
 #ifndef NUM_INTEGER_BITS
 extern int number_to_int_t(number_t *numval,int_t *intval);
