@@ -126,7 +126,7 @@ operation first_operator[max_operator_depth]=
 #ifdef HAVE_UNARY_OPERATORS
    first_unary_op,
 #else
-   0,
+   first_op,
 #endif
 #ifdef HAVE_BINARY_OPERATORS
    first_binary_op
@@ -289,7 +289,7 @@ void print_progress(int sig)
       }
    }
    timersub(&currtime,&starttime[0],&resulttime);
-   printf("curr depth="DEPTH_CHANGE_FORMAT" max_stack_depth="DEPTH_CHANGE_FORMAT
+   printf("curr depth=" DEPTH_CHANGE_FORMAT " max_stack_depth=" DEPTH_CHANGE_FORMAT 
 	  " time running=%lu secs ",
 	  sum->stack_depth,max_stack_depth,resulttime.tv_sec);
    printf("est_currdepth_time=%d secs est_time_remaining=%d secs\n",(int)est_currdepth_time,(int)est_time_remaining);
@@ -316,6 +316,9 @@ result_t alloc_result(int num_answers)
 #endif
 
 
+//#ifdef THREADED_CUDA
+//__global__
+//#endif
 depth_t get_op_depth(stack_entry *curr)
 {
    stack_tag curr_tag=curr->tag;
@@ -329,7 +332,7 @@ depth_t get_op_depth(stack_entry *curr)
 #endif
       default:
 	 if((long)curr>=(long)&sum&&(long)curr<(long)&sum->stack[max_stack_depth])
-	    fprintf(stderr,"illegal tag in get_depth curr=%p tag="DEPTH_CHANGE_FORMAT"\n",curr,curr_tag);
+	    fprintf(stderr,"illegal tag in get_depth curr=%p tag=" DEPTH_CHANGE_FORMAT "\n",curr,curr_tag);
 	 return ((long)&sum->stack[sum->stack_depth]-(long)curr)/(long)sizeof(&sum->stack[0]);
 #if 0
 	 else
@@ -358,7 +361,7 @@ depth_t get_depth_change(stack_entry *curr)
 	 return 1-NUM_SEQUENCE_DIMENSIONS;
 #endif
       default:
-	 exit_error("illegal tag in get_depth_change curr=%p tag="DEPTH_CHANGE_FORMAT"\n",curr,curr_tag);
+	 exit_error("illegal tag in get_depth_change curr=%p tag=" DEPTH_CHANGE_FORMAT "\n",curr,curr_tag);
 	 return -1;
 	 
    }
@@ -418,7 +421,7 @@ result_t *get_array_member(dimension_t *array_indices,dimension_t *idxptr)
    if(array_indices[0]>=sequence_dimension[0]||array_indices[0]<0)
       exit_error("get_array_member illegal dimension index "
 		 " attempted to access "
-		 DIMENSION_FORMAT" max="DIMENSION_FORMAT"\n",array_indices[0],
+		 DIMENSION_FORMAT" max=" DIMENSION_FORMAT "\n",array_indices[0],
 		 sequence_dimension[0]);
    if(idxptr)
       *idxptr=array_indices[0];
@@ -1561,11 +1564,18 @@ void *process_sum_thread(void *arg)
   Queue *queue=process_queue[(int)arg];
   do
     {
+      while(queue_length(queue)==0)
+      {
+      sched_yield();
+      if(done_processing)
+	goto done;
+      }
       sum_t *curr_sum=dequeue(queue);
       process_sum_single_thread(queue,curr_sum);
       free(curr_sum->result_stack);
       free(curr_sum);
     } while(!done_processing||queue_length(queue));
+ done:
   queue_free(queue);
   ret=atomic_fetch_sub(&num_threads,1);
   if(ret==0&&print_queue)
