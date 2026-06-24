@@ -1,3 +1,6 @@
+# Latest news
+pthreads now work see MULTI_THREADED define in the source
+THREADED_CUDA is a vibe coded start to cuda support thanks to github copilot
 # Caveats
 If you find the latest code unstable check out a version prior to September 2025, I added code for symbolic regression of loops around paddys day march 17th 2023 this made my brain melt and I threw it out. Maybe some enthuastic young turk will reintegrate it and remove final bugs.
 

@@ -64,6 +64,6 @@
 //#define HAVE_LMS_ERROR
 //#define LOOPVAR_LOOP 	for(loopvar=0;loopvar<8;loopvar++)
 //#define STRING_LOOPVAR_LOOP #LOOPVAR_LOOP
-//#define MULTI_THREADED
+#define MULTI_THREADED
 //#define THREADED_OPENCL
-#define THREADED_CUDA
+//#define THREADED_CUDA
