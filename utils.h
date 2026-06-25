@@ -4,7 +4,9 @@
 
 #define TRUE  (1)
 #define FALSE (0)
+#ifndef THREADED_CUDA
 #define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
+#endif
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>

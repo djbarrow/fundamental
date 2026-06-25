@@ -58,6 +58,9 @@ pthread_t *process_thread=NULL,print_thread;
 #ifdef CQUEUE
 Queue **process_queue,*print_queue;
 #endif
+#ifdef RINGBUFF
+ringbuff_t **process_ringbuff,*print_ringbuff;
+#endif
 #endif
 #ifdef THREADED_CUDA
 #include <cuda_runtime.h>
@@ -991,6 +994,18 @@ int increment_functions()
 #endif
 #ifdef MULTI_THREADED
 #include <stdatomic.h>
+FILE *cstream_to_stream(cstream stream)
+{
+  switch(stream)
+    {
+    case cnull:
+      exit_error("cstream null");
+    case cstdout:
+      return stdout;
+    case cstderr:
+      return stderr;
+    }
+}
 void *print_sum_thread(void *args)
 {
   int ret;
@@ -999,6 +1014,9 @@ void *print_sum_thread(void *args)
 #ifdef CQUEUE
     while(queue_length(print_queue)==0)
 #endif
+#ifdef RINGBUFF
+     while(ringbuff_empty(print_ringbuff))
+#endif      
       {
       sched_yield();
       ret=atomic_load(&num_threads);
@@ -1008,30 +1026,57 @@ void *print_sum_thread(void *args)
       sum2_t *sum2=
 #ifdef CQUEUE
 	dequeue(print_queue);
-#else
-      NULL;
+#endif
+#ifdef RINGBUFF
+      (sum2_t *)ringbuff_dequeue(print_ringbuff);
 #endif      
       if(!sum2)
 	break;
-      if(sum2->pre_buf)
+#ifdef CQUEUE
+      if(sum2->pre_buff)
 	{
-	  fwrite(sum2->pre_buf,1,strlen(sum2->pre_buf),sum2->pre_stream);
-	  free(sum2->pre_buf);
+	  fwrite(sum2->pre_buff,1,strlen(sum2->pre_buff),cstream_to_stream(sum2->pre_stream));
+	  free(sum2->pre_buff);
 	}
-      print_sum(&sum2->sum);
-      if(sum2->post_buf)
+#endif
+#ifdef RINGBUFF
+      if(sum2->pre_stream!=cnull)
 	{
-	  fwrite(sum2->post_buf,1,strlen(sum2->post_buf),sum2->post_stream);
-	  free(sum2->post_buf);
+	  fwrite(sum2->pre_buff,1,strlen(sum2->pre_buff),cstream_to_stream(sum2->pre_stream));
 	}
+#endif      
+      print_sum((sum_t *)&sum2->sum);
+#ifdef CQUEUE
+      if(sum2->post_buff)
+	{
+	  fwrite(sum2->post_buff,1,strlen(sum2->post_buff),cstream_to_stream(sum2->post_stream));
+	  free(sum2->post_buff);
+	}
+#endif
+#ifdef RINGBUFF
+      if(sum2->post_stream!=cnull)
+	{
+	  fwrite(sum2->post_buff,1,strlen(sum2->post_buff),cstream_to_stream(sum2->post_stream));
+	  free(sum2->post_buff);
+	}
+#endif      
+#ifdef CQUEUE
       free(sum2->sum.result_stack);
       free(sum2);
+#endif
+#ifdef RINGBUFF
+      ringbuff_release(print_ringbuff);
+#endif      
      }
     //sem_post(&print_queue->dequeue);
  done:
 #ifdef CQUEUE
   queue_free(print_queue);
   print_queue=NULL;
+#endif
+#ifdef RINGBUFF
+  ringbuff_free(print_ringbuff);
+  print_ringbuff=NULL;
 #endif
   return(NULL);
 }
@@ -1338,22 +1383,50 @@ void sum_correct_func(calculate_sum_result *retval)
 #endif
 }
 #ifdef MULTI_THREADED
-void queue_print_sum(FILE *restrict pre_stream,void *pre_buf,FILE  *restrict post_stream,void *post_buf,sum_t *curr_sum)
+void queue_print_sum(cstream pre_stream,
+#ifdef CQUEUE
+		     void *pre_buf,
+#endif
+		     cstream post_stream,
+#ifdef CQUEUE
+		     void *post_buf,
+#endif
+		     sum_t *curr_sum,
+#ifdef RINGBUFF
+		     sum2_t *queue_sum	     
+#endif
+
+		     )
 {
+#ifdef CQUEUE
   sum2_t *queue_sum=(sum2_t *)myalloc("sum2",offsetof(sum2_t,sum.stack[sum->stack_depth]));
+#endif  
   memcpy(&queue_sum->sum,curr_sum,offsetof(sum_t,stack[curr_sum->stack_depth]));
   queue_sum->pre_stream=pre_stream;
+#ifdef CQUEUE
   queue_sum->pre_buf=pre_buf;
+#endif
   queue_sum->post_stream=post_stream;
+#ifdef CQUEUE
   queue_sum->post_buf=post_buf;
+#endif
+
   queue_sum->sum.stack_depth=curr_sum->stack_depth;
 #ifdef HAVE_FUNCTIONS
   queue_sum->sum.seed=sum->seed;
-#endif  
+#endif
+#ifdef CQUEUE
   queue_sum->sum.result_stack=(number_t *)myalloc("result_stack",(sizeof(number_t)*(curr_sum->stack_depth+RESULT_STACK_END)));
+#endif
+#ifdef RINGBUFFER
+  queue_sum->sum.result_stack=queue_sum->sum.result_stack_buff;
+#endif
   memcpy(queue_sum->sum.result_stack,curr_sum->result_stack,(sizeof(number_t)*(curr_sum->stack_depth+RESULT_STACK_END)));
 #ifdef CQUEUE  
   enqueue(print_queue, (void *)queue_sum);
+#endif
+#ifdef RINGBUFF
+  ringbuff_enqueue(print_ringbuff);
 #endif
 }
 #endif
@@ -1444,8 +1517,14 @@ calculate_sum_result calculate_sum(sum_t *curr_sum,calculate_sum_func_t sum_func
 	    
 	    if((curr_result_ptr<&curr_sum->result_stack[0])&&(curr_result_ptr>&curr_sum->result_stack[(max_stack_depth)]))
 	      {
-#if defined(MULTI_THREADED) || defined(THREADED_CUDA)		
+#if defined(MULTI_THREADED) || defined(THREADED_CUDA)
+#ifdef CQUEUE
 		char *buff=(char *)myalloc("sprintf_buff",1024);
+#endif
+#ifdef RINGBUFF
+		sum2_t *queue_sum=(sum2_t *)ringbuff_getbuff(print_ringbuff);
+		char   *buff=queue_sum->pre_buff;
+#endif
 #else
 		char *buff=(char *)alloca(1024);
 #endif
@@ -1453,7 +1532,19 @@ calculate_sum_result calculate_sum(sum_t *curr_sum,calculate_sum_func_t sum_func
 			"!=&result_stack[0](%p)\n",
 			curr_result_ptr,&curr_sum->result_stack[0]);
 #if defined(MULTI_THREADED) || defined(THREADED_CUDA)
-		queue_print_sum(stderr,buff,NULL,NULL,curr_sum);
+		queue_print_sum(cstderr,
+#ifdef CQUEUE
+				buff,
+#endif
+				cnull,
+#ifdef CQUEUE				
+				NULL,
+#endif
+				curr_sum
+#ifdef RINGBUFF
+				,queue_sum
+#endif
+				);
 #else
 		fwrite((void *)buff,1,strlen(buff),stderr);
 		print_sum(sum);
@@ -1579,10 +1670,16 @@ void *process_sum_thread(void *arg)
 #ifdef CQUEUE
   Queue *queue=process_queue[(int)arg];
 #endif
+#ifdef RINGBUFF
+  ringbuff_t *ringbuff=process_ringbuff[(int)arg];
+#endif
   do
     {
 #ifdef CQUEUE
       while(queue_length(queue)==0)
+#endif
+#ifdef RINGBUFF
+     while(ringbuff_empty(ringbuff))
 #endif
       {
       sched_yield();
@@ -1804,12 +1901,18 @@ void start_threads()
   process_thread=(pthread_t *)myalloc("process_thread",sizeof(pthread_t)*nproc);
 #ifdef CQUEUE
   process_queue=(Queue **)myalloc("process_queue",sizeof(Queue *)*nproc);
-#endif  
+#endif
+#ifdef RINGBUFF
+  process_ringbuff=(ringbuff_t **)myalloc("process_ringbuffer",sizeof(ringbuff_t *)*nproc);
+#endif
   atomic_store(&num_threads,nproc);
   for(i=0;i<nproc;i++)
     {
 #ifdef CQUEUE
       process_queue[i]=queue_alloc(1024);
+#endif
+#ifdef RINGBUFF
+      ringbuff_alloc(process_ringbuff[i],1024,sz);
 #endif
       if(pthread_create(&process_thread[i],NULL,process_sum_thread,(void *)i))
 	exit_error("pthread_create thread[i] failed");
@@ -1817,6 +1920,9 @@ void start_threads()
     }
 #ifdef CQUEUE
   print_queue=queue_alloc(1024);
+#endif
+#ifdef RINGBUFF
+      ringbuff_alloc(print_ringbuff,1024,sz);
 #endif
   if(pthread_create(&print_thread,NULL,print_sum_thread,NULL))
     exit_error("pthread_create print_sum_thread failed");

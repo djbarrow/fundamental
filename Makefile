@@ -11,6 +11,9 @@ print_sum.o \
 fundtest.o \
 csv.o \
 c-queue/queue.o
+#ringbuffer/ringbuffer.o
+
+
 #fundtest.o 
 #factor_test.o
 

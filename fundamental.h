@@ -624,15 +624,50 @@ typedef struct
       number_t *result_stack;
       stack_entry stack[];
 } sum_t;
-
+#ifdef RINGBUFF
+#define RINGBUFFER_MAX_STACK_DEPTH (32)
+typedef struct 
+{
+      int     stack_depth;
+#ifdef HAVE_FUNCTIONS
+      dimension_t seed;
+#endif
+      number_t *result_stack;
+      stack_entry stack[RINGBUFFER_MAX_STACK_DEPTH];
+      number_t result_stack_buff[RINGBUFFER_MAX_STACK_DEPTH];
+} sumbuff_t;
+#endif
 #include <stdio.h>
+typedef enum
+  {
+    cnull,
+    cstdout,
+    cstderr
+  } cstream;
+
+#define SUM2_BUFLEN (1024)
 typedef struct
 {
-  FILE *pre_stream;
-  void *pre_buf;
-  FILE  *post_stream;
-  void *post_buf;
+  cstream pre_stream;
+#ifdef CQUEUE  
+  void *pre_buff;
+#endif
+#ifdef RINGBUFF
+  char pre_buff[SUM2_BUFLEN];
+#endif
+  cstream post_stream;
+#ifdef CQUEUE
+  void *post_buff;
+#endif
+#ifdef RINGBUFF
+  char post_buff[SUM2_BUFLEN];
+#endif
+#ifdef CQUEUE
   sum_t sum;
+#endif
+#ifdef RINGBUFF
+  sumbuff_t sum;
+#endif
 } sum2_t;
 
 #if defined(MULTIPLE_RESULTS) || defined(HAVE_FUNCTIONS) 
@@ -702,8 +737,8 @@ typedef void (*calculate_sum_func_t)(calculate_sum_result *retval);
 #ifdef CQUEUE
 #include "c-queue/queue.h"
 #endif
-#ifdef RINGBUFFER
-#include "ringBuffer/ringBuffer.h"
+#ifdef RINGBUFF
+#include "ringbuffer/ringbuffer.h"
 #endif
 #endif
 extern calculate_sum_result calculate_sum(sum_t *sum,calculate_sum_func_t sum_func);
