@@ -1,4 +1,4 @@
-/*
+#/*
   This file is part of fundamental a brute force searcher
   for relationships between constants & formulae for sequences.
   Copyright (C) 2004  D.J. Barrow dj_barrow@ariasoft.ie barrow_dj@yahoo.com
@@ -1020,7 +1020,7 @@ void *print_sum_thread(void *args)
       {
       sched_yield();
       ret=atomic_load(&num_threads);
-      if(ret==0)
+      if(ret==0&&queue_length(print_queue)==0)
 	goto done;
       }		 
       sum2_t *sum2=
@@ -1683,7 +1683,7 @@ void *process_sum_thread(void *arg)
 #endif
       {
       sched_yield();
-      if(done_processing)
+      if(done_processing&&queue_length(queue)==0)
 	goto done;
       }
       sum_t *curr_sum=
