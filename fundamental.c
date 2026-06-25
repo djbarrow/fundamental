@@ -1178,7 +1178,7 @@ int check_sum()
 
 		sprintf(buff,"Found integer match %E\n",sum->result_stack[0]);
 #if defined(MULTI_THREADED) || defined(THREADED_CUDA)
-		queue_print_sum(stdout,buff,NULL,NULLsum);
+		queue_print_sum(cstdout,buff,cnull,NULL,sum);
 #else
 		printf(buff)
 		print_sum(sum);
@@ -1216,7 +1216,7 @@ int check_sum()
 #endif
 			curr_const->name,curr_const->value);
 #if defined(MULTI_THREADED) || defined(THREADED_CUDA)
-		queue_print_sum(stdout,buff,NULL,NULL,sum);
+		queue_print_sum(cstdout,buff,cnull,NULL,sum);
 #else
 		printf(buff);
 		print_sum(sum);
@@ -1385,15 +1385,15 @@ void sum_correct_func(calculate_sum_result *retval)
 #ifdef MULTI_THREADED
 void queue_print_sum(cstream pre_stream,
 #ifdef CQUEUE
-		     void *pre_buf,
+		     void *pre_buff,
 #endif
 		     cstream post_stream,
 #ifdef CQUEUE
-		     void *post_buf,
+		     void *post_buff,
 #endif
-		     sum_t *curr_sum,
+		     sum_t *curr_sum
 #ifdef RINGBUFF
-		     sum2_t *queue_sum	     
+		     ,sum2_t *queue_sum	     
 #endif
 
 		     )
@@ -1404,11 +1404,11 @@ void queue_print_sum(cstream pre_stream,
   memcpy(&queue_sum->sum,curr_sum,offsetof(sum_t,stack[curr_sum->stack_depth]));
   queue_sum->pre_stream=pre_stream;
 #ifdef CQUEUE
-  queue_sum->pre_buf=pre_buf;
+  queue_sum->pre_buff=pre_buff;
 #endif
   queue_sum->post_stream=post_stream;
 #ifdef CQUEUE
-  queue_sum->post_buf=post_buf;
+  queue_sum->post_buff=post_buff;
 #endif
 
   queue_sum->sum.stack_depth=curr_sum->stack_depth;
@@ -1432,7 +1432,7 @@ void queue_print_sum(cstream pre_stream,
 #endif
 
 #ifdef THREADED_CUDA
-void queue_print_sum(FILE *restrict pre_stream,void *pre_buf,FILE  *restrict post_stream,void *post_buf,sum_t *curr_sum)
+void queue_print_sum(cstream pre_stream,void *pre_buf,cstream post_stream,void *post_buf,sum_t *curr_sum)
 {
   /* CUDA version: Copy sum to device print queue */
   sum2_t *host_sum2=(sum2_t *)myalloc("sum2",offsetof(sum2_t,sum.stack[curr_sum->stack_depth]));
@@ -1640,7 +1640,7 @@ int process_sum_single_thread(
 
 		sprintf(buff,"curr_depth=%d sequence_correct_count %d num_sequence_errors=%d\n",curr_sum->stack_depth,result.num_sequence_correct_count,result.num_sequence_errors);
 #if (defined(MULTI_THREADED) || defined(THREADED_CUDA))
-		 queue_print_sum(NULL,NULL,stdout,buff,curr_sum);
+		 queue_print_sum(cnull,NULL,cstdout,buff,curr_sum);
 #else		 
 		 print_sum(curr_sum);
 		 fwrite((void *)buff,1,strlen(buff),stdout); 
