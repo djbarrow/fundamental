@@ -1,9 +1,10 @@
 # Latest news
 pthreads now work see MULTI_THREADED define in the source
 THREADED_CUDA is a vibe coded start to cuda support thanks to github copilot
-It looks like my code will run very badly on cuda especially my do_sum switch statement
+It looks like my code will run very badly on cuda especially my do_sum switch statement it's just AI slop produced by github copilot.
 https://www.reddit.com/r/CUDA/comments/8ym9us/optimizing_an_algorithm_that_has_a_long_switch/
 for more details study SIMT and warps on cuda.
+
 My RINGBUFF code is broken so don't define it in fundamental_config.h.
 I don't know what to do to improve the code further and seeing the limits of cuda vs an normal cpu I seriously wonder how nvidia became the most valuable company in the world it sucks to program cuda.
 # Caveats
