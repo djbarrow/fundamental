@@ -107,7 +107,61 @@ sum_t *sum;
 
 int num_answers=0,max_num_answers=-1;
 
+#ifdef HAVE_LOOPVAR
+#define RESULT_STACK_END (1)
+#else
+#define RESULT_STACK_END (0)
+#endif
 
+
+#ifdef MULTI_THREADED
+void queue_print_sum(cstream pre_stream,
+#ifdef CQUEUE
+		     void *pre_buff,
+#endif
+		     cstream post_stream,
+#ifdef CQUEUE
+		     void *post_buff,
+#endif
+		     sum_t *curr_sum
+#ifdef RINGBUFF
+		     ,sum2_t *queue_sum	     
+#endif
+
+		     )
+{
+#ifdef CQUEUE
+  sum2_t *queue_sum=(sum2_t *)myalloc("sum2",offsetof(sum2_t,sum.stack[sum->stack_depth]));
+#endif  
+  memcpy(&queue_sum->sum,curr_sum,offsetof(sum_t,stack[curr_sum->stack_depth]));
+  queue_sum->pre_stream=pre_stream;
+#ifdef CQUEUE
+  queue_sum->pre_buff=pre_buff;
+#endif
+  queue_sum->post_stream=post_stream;
+#ifdef CQUEUE
+  queue_sum->post_buff=post_buff;
+#endif
+
+  queue_sum->sum.stack_depth=curr_sum->stack_depth;
+#ifdef HAVE_FUNCTIONS
+  queue_sum->sum.seed=sum->seed;
+#endif
+#ifdef CQUEUE
+  queue_sum->sum.result_stack=(number_t *)myalloc("result_stack",(sizeof(number_t)*(curr_sum->stack_depth+RESULT_STACK_END)));
+#endif
+#ifdef RINGBUFFER
+  queue_sum->sum.result_stack=queue_sum->sum.result_stack_buff;
+#endif
+  memcpy(queue_sum->sum.result_stack,curr_sum->result_stack,(sizeof(number_t)*(curr_sum->stack_depth+RESULT_STACK_END)));
+#ifdef CQUEUE  
+  enqueue(print_queue, (void *)queue_sum);
+#endif
+#ifdef RINGBUFF
+  ringbuff_enqueue(print_ringbuff);
+#endif
+}
+#endif
 
 #ifdef SEED
 #define MIN_SEED (SEED)
@@ -138,11 +192,6 @@ operation first_operator[max_operator_depth]=
 #endif
 };
 
-#ifdef HAVE_LOOPVAR
-#define RESULT_STACK_END (1)
-#else
-#define RESULT_STACK_END (0)
-#endif
 
 
 #ifdef HAVE_ERROR_MEASUREMENTS
@@ -433,6 +482,7 @@ result_t *get_array_member(dimension_t *array_indices,dimension_t *idxptr)
    return(&sequence_array[array_indices[0]]);
 #endif
 }
+
 
 
 int increment_array_indices(dimension_t seed_idx
@@ -802,8 +852,11 @@ error_t calulate_error_ratio(dimension_t *array_indices)
 #endif
 
 
- 
+
 #if !defined(NUM_INTEGER_BITS) && !defined(ERROR_OP)
+#ifdef MULTI_THREADED
+__thread
+#endif
 number_t error1;
 #endif
 int result_correct(result_t testvals)
@@ -1382,54 +1435,7 @@ void sum_correct_func(calculate_sum_result *retval)
       retval->sum_correct=FALSE;
 #endif
 }
-#ifdef MULTI_THREADED
-void queue_print_sum(cstream pre_stream,
-#ifdef CQUEUE
-		     void *pre_buff,
-#endif
-		     cstream post_stream,
-#ifdef CQUEUE
-		     void *post_buff,
-#endif
-		     sum_t *curr_sum
-#ifdef RINGBUFF
-		     ,sum2_t *queue_sum	     
-#endif
 
-		     )
-{
-#ifdef CQUEUE
-  sum2_t *queue_sum=(sum2_t *)myalloc("sum2",offsetof(sum2_t,sum.stack[sum->stack_depth]));
-#endif  
-  memcpy(&queue_sum->sum,curr_sum,offsetof(sum_t,stack[curr_sum->stack_depth]));
-  queue_sum->pre_stream=pre_stream;
-#ifdef CQUEUE
-  queue_sum->pre_buff=pre_buff;
-#endif
-  queue_sum->post_stream=post_stream;
-#ifdef CQUEUE
-  queue_sum->post_buff=post_buff;
-#endif
-
-  queue_sum->sum.stack_depth=curr_sum->stack_depth;
-#ifdef HAVE_FUNCTIONS
-  queue_sum->sum.seed=sum->seed;
-#endif
-#ifdef CQUEUE
-  queue_sum->sum.result_stack=(number_t *)myalloc("result_stack",(sizeof(number_t)*(curr_sum->stack_depth+RESULT_STACK_END)));
-#endif
-#ifdef RINGBUFFER
-  queue_sum->sum.result_stack=queue_sum->sum.result_stack_buff;
-#endif
-  memcpy(queue_sum->sum.result_stack,curr_sum->result_stack,(sizeof(number_t)*(curr_sum->stack_depth+RESULT_STACK_END)));
-#ifdef CQUEUE  
-  enqueue(print_queue, (void *)queue_sum);
-#endif
-#ifdef RINGBUFF
-  ringbuff_enqueue(print_ringbuff);
-#endif
-}
-#endif
 
 #ifdef THREADED_CUDA
 void queue_print_sum(cstream pre_stream,void *pre_buf,cstream post_stream,void *post_buf,sum_t *curr_sum)
