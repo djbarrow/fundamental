@@ -17,8 +17,9 @@ p avodagro_constant 6.0221367e+23
 p loschmidt_constant 2.686736e+25
 p molar_gas_constant 8.314510
 p faraday_constant 9.6484531e+4
-p stefan_boltzmann_constant 5.67051e+8
+p stefan_boltzmann_constant 5.67051e-8
 p rydberg_constant 1.0973731534e+7
 p gravitational_constant 6.67259e+11
 p acceleration_due_to_gravity 9.80665
+
 
