@@ -402,9 +402,9 @@ void print_sum_rpn(sum_t *sum)
 	      break;
 	    }
 	}
-     
+      printf("\n");
     }
-  printf("\n");
+  
 }
 #endif
 
