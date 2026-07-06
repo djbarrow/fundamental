@@ -21,5 +21,12 @@ p stefan_boltzmann_constant 5.67051e-8
 p rydberg_constant 1.0973731534e+7
 p gravitational_constant 6.67259e+11
 p acceleration_due_to_gravity 9.80665
-
+m euler_macheroni_const 0.5772156649
+m aperys_const 1.202056903159594
+m catalans_const 0.9159655941
+m leminscate_const 2.6220575542
+m glaischer-kinkelin_const 1.2824271291
+m khinchins_const 2.6854520010
+m feigenbaum_const1 4.6692016091
+m feigenbaum_const2 2.5029078750
 

@@ -13,12 +13,12 @@
 #define HAVE_ADDITION_OP
 //#define HAVE_SUBTRACTION_OP
 //#define HAVE_MULTIPLY_OP
-//#define HAVE_DIVIDE_OP
+#define HAVE_DIVIDE_OP
 #define HAVE_POWER_OP
-#define HAVE_MODULO_OP
+//#define HAVE_MODULO_OP
 //#define HAVE_AND_OP
 //#define HAVE_OR_OP
-#define HAVE_XOR_OP
+//#define HAVE_XOR_OP
 //#define HAVE_LOG_SHIFT_OP
 //#define HAVE_LOG_RSHIFT_OP
 //#define HAVE_LOG_LSHIFT_OP
@@ -42,12 +42,12 @@
 
 
 /* General operation characteristics */
-#define SEQUENCE_HUNTER
+//#define SEQUENCE_HUNTER
 #define NUM_SEQUENCE_DIMENSIONS (1)
 //#define REAL_HUNTER
 //#define HAVE_FUNCTIONS
 //#define NUM_HUNTER_DIMENSIONS (3)
-#define NUM_INTEGER_BITS   (64)
+//#define NUM_INTEGER_BITS   (64)
 #define HAVE_CONSTANTS_FILE
 #define HAVE_PRINT_SUM_INFIX
 #define HAVE_PRINT_SUM_RPN
