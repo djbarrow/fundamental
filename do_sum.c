@@ -157,7 +157,7 @@ int do_binary_sum(number_t *result_ptr,number_t *operand,stack_entry *curr)
 	    if(number_to_int_t(&n,&n1))
 	       abort_sum(-1,"number out of range\n");
 
-	    *result_ptr=n-n1;
+	    *result_ptr=(n-n1)*operand[1];
 	 }
 #endif
 	 break;
@@ -345,11 +345,11 @@ int do_sum(number_t **result_stack_head_ptrptr,stack_entry *curr)
 	    abort_sum(-1,"factorial out of bounds "
 		      NUMBER_FORMAT,operand[0]);
 	 *result_ptr=
-	    factorials[
-#ifndef NUM_INTEGER_BITS
-	       (int_t)
+#ifdef NUM_INTEGER_BITS
+	   factorials[operand[0]];
+#else
+	 tgamma(operand[0]+1.0);
 #endif
-	       operand[0]];
 	 break;
 #endif
 
