@@ -253,5 +253,8 @@ eureqa code is commercial and similar to my code slightly tidier as a commercial
 
 The successive approximation/genetic algorithm HAVE_ERROR_MEASURMENTS is incomplete just leave it out of fundamental_config.h
 
+There is an extensive list of non fundamental maths constants at https://calculla.com/math_constants
+
+
 ## More about the Author
 I thank God for inspiring this code, my blog business card can be found here https://djbarrow.blogspot.com/2021/03/about-me_13.html 
